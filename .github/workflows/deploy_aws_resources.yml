@@ -103,7 +103,7 @@ jobs:
             SourceBucketName=${{ github.event.inputs.SourceBucketName }}
 
   pipeline:
-    # needs: cfn-deployment
+    needs: cfn-deployment
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
