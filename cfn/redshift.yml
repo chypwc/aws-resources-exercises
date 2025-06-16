@@ -1,10 +1,10 @@
 Parameters:
   SourceBucketName:
     Type: String
-    Description: Name of the data S3 bucket
+    Description: Name of the source data S3 bucket
   DataBucketName:
     Type: String
-    Description: Name of the source S3 bucket
+    Description: Name of the data S3 bucket
   PrivateSubnet1:
     Type: AWS::EC2::Subnet::Id
     Description: First private subnet for Redshift
@@ -25,6 +25,24 @@ Mappings:
       nodeCount: 2 # Number of nodes if multi-node
 
 Resources:
+  RedshiftCluster:
+    Type: AWS::Redshift::Cluster
+    Properties:
+      ClusterType: !FindInMap [ClusterConfigurations, redshift, clusterType]
+      NodeType: !FindInMap [ClusterConfigurations, redshift, nodeType]
+      NumberOfNodes: !FindInMap [ClusterConfigurations, redshift, nodeCount]
+      DBName: !FindInMap [ClusterConfigurations, redshift, dbName]
+      MasterUsername: !Sub "{{resolve:secretsmanager:${RedshiftCreds}:SecretString:username}}"
+      MasterUserPassword: !Sub "{{resolve:secretsmanager:${RedshiftCreds}:SecretString:password}}"
+      VpcSecurityGroupIds:
+        - !Ref RedShiftSG
+      ClusterSubnetGroupName: !Ref RedshiftSubnetGroup
+      IamRoles:
+        - !GetAtt RedshiftIamRole.Arn
+      ClusterParameterGroupName: !Ref RedshiftClusterParameterGroup
+      PubliclyAccessible: false
+      Encrypted: true
+
   # Create a security group dedicated to the Redshift cluster
   RedShiftSG:
     Type: "AWS::EC2::SecurityGroup"
@@ -71,6 +89,7 @@ Resources:
           [!Ref "AWS::StackName", " - Redshift Cluster Parameter group"],
         ]
       ParameterGroupFamily: redshift-1.0 # Family name must match Redshift engine version
+      Parameters: []
 
   # Store Redshift master user credentials securely in AWS Secrets Manager
   RedshiftCreds:
@@ -158,6 +177,7 @@ Resources:
     # Glue connection to Redshift using JDBC — enables Glue jobs to communicate with Redshift
   GlueRedshiftConnection:
     Type: AWS::Glue::Connection
+    DependsOn: RedshiftCluster
     Properties:
       # The AWS account ID under which to create the Glue connection
       CatalogId: !Ref AWS::AccountId
@@ -244,4 +264,4 @@ Outputs:
     Value: !GetAtt RedshiftIamRole.Arn
   RedshiftS3TempPath:
     Description: Temporary path used by Redshift to store data
-    Value: !Join ["", ["s3://", !Ref DataBucket, "/redshift-temp-dir/"]]
+    Value: !Join ["", ["s3://", !Ref DataBucketName, "/redshift-temp-dir/"]]
