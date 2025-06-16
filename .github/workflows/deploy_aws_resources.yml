@@ -82,8 +82,34 @@ jobs:
             DataBucketName=${{ github.event.inputs.DataBucketName }}
           capabilities: CAPABILITY_NAMED_IAM
 
-      - name: Upload CSV files to S3 Source Bucket
-        id: upload-data
+      - name: Deploy Glue Crawler
+        id: glue-crawler
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        with:
+          name: glue-crawler
+          template: cfn/glue.yml
+          capabilities: CAPABILITY_NAMED_IAM
+          parameter-overrides: >-
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }}
+
+  pipeline:
+    needs: cfn-deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        id: creds-pipeline
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ github.event.inputs.region }}
+
+      - name: Run ingestion script
         run: |
-          echo "Uploading CSV files to s3://${{ github.event.inputs.SourceBucketName }}/input/"
-          aws s3 cp ./data/ s3://${{ github.event.inputs.SourceBucketName }}/input/ --recursive --exclude "*" --include "*.csv"
+          bash pipeline/ingest.sh
+        env:
+          SourceBucketName: ${{ github.event.inputs.SourceBucketName }}
+          CrawlerName: source-csv-crawler
