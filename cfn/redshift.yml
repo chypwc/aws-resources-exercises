@@ -5,15 +5,6 @@ Parameters:
   DataBucketName:
     Type: String
     Description: Name of the data S3 bucket
-  PrivateSubnet1:
-    Type: AWS::EC2::Subnet::Id
-    Description: First private subnet for Redshift
-  PrivateSubnet2:
-    Type: AWS::EC2::Subnet::Id
-    Description: Second private subnet for Redshift
-  VPC:
-    Type: AWS::EC2::VPC::Id
-    Description: VPC ID for Redshift resources
 
 Mappings:
   ClusterConfigurations: # Settings for Redshift cluster
@@ -48,7 +39,7 @@ Resources:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
       GroupDescription: "Security group for Redshift cluster"
-      VpcId: !Ref VPC # Attach the security group to the specified VPC
+      VpcId: !ImportValue vpc-stack-VPCId # Attach the security group to the specified VPC
 
   # Allow all TCP traffic within the Redshift security group (node-to-node communication)
   RedshiftSGIngressSelfAllTcp:
@@ -76,8 +67,8 @@ Resources:
     Properties:
       Description: "Redshift cluster subnet group"
       SubnetIds:
-        - !Ref PrivateSubnet1 # First private subnet
-        - !Ref PrivateSubnet2 # Second private subnet
+        - !ImportValue vpc-stack-PrivateSubnet1 # First private subnet
+        - !ImportValue vpc-stack-PrivateSubnet2 # Second private subnet
 
   # Optional: Create a parameter group for Redshift to customize DB-level settings
   RedshiftClusterParameterGroup:
@@ -196,7 +187,7 @@ Resources:
             - !Ref RedShiftSG
 
           # Specify the private subnet that can access Redshift
-          SubnetId: !Ref PrivateSubnet1
+          SubnetId: !ImportValue vpc-stack-PrivateSubnet1
 
           # Select the first Availability Zone (AZ) from the region to place the connection in
           AvailabilityZone: !Select
