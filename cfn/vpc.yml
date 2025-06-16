@@ -38,14 +38,15 @@ Resources:
       EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: VPC-0616
+          Value: !Sub ${AWS::StackName}-VPC
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
+    DependsOn: VPC
     Properties:
       Tags:
         - Key: Name
-          Value: InternetGateway-0616
+          Value: !Sub ${AWS::StackName}-IGW
 
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -58,44 +59,44 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       CidrBlock: !Ref PublicSubnet1Cidr
-      AvailabilityZone: !Select [0, !GetAZs ""]
+      AvailabilityZone: !Select [0, !GetAZs ]
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: PublicSubnet1-0616
+          Value: !Sub ${AWS::StackName}-PublicSubnet1
 
   PublicSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: !Ref PublicSubnet2Cidr
-      AvailabilityZone: !Select [1, !GetAZs ""]
+      AvailabilityZone: !Select [1, !GetAZs ]
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: PublicSubnet2-0616
+          Value: !Sub ${AWS::StackName}-PublicSubnet2
 
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: !Ref PrivateSubnet1Cidr
-      AvailabilityZone: !Select [0, !GetAZs ""]
+      AvailabilityZone: !Select [0, !GetAZs ]
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: PrivateSubnet1-0616
+          Value: !Sub ${AWS::StackName}-PrivateSubnet1
 
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: !Ref PrivateSubnet2Cidr
-      AvailabilityZone: !Select [1, !GetAZs ""]
+      AvailabilityZone: !Select [1, !GetAZs ]
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: PrivateSubnet2-0616
+          Value: !Sub ${AWS::StackName}-PrivateSubnet2
 
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
@@ -103,7 +104,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: PublicRouteTable-0616
+          Value: !Sub ${AWS::StackName}-PublicRT
 
   PublicRoute:
     Type: AWS::EC2::Route
@@ -138,7 +139,7 @@ Resources:
       SubnetId: !Ref PublicSubnet1
       Tags:
         - Key: Name
-          Value: MyNatGateway-0616
+          Value: !Sub NAT-${AWS::StackName}
 
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
@@ -146,7 +147,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: PrivateRouteTable1-0616
+          Value: !Sub ${AWS::StackName}-PrivateRT1
 
   PrivateRouteTable2:
     Type: AWS::EC2::RouteTable
@@ -154,7 +155,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: PrivateRouteTable2-0616
+          Value: !Sub ${AWS::StackName}-PrivateRT2
 
   PrivateRoute1:
     Type: AWS::EC2::Route
