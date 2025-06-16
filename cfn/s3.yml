@@ -9,8 +9,8 @@ Parameters:
 Resources:
   DataBucket:
     Type: AWS::S3::Bucket
-    BucketName: !Ref SourceBucketName
     Properties:
+      BucketName: !Ref SourceBucketName
       PublicAccessBlockConfiguration:
         BlockPublicAcls: True
         BlockPublicPolicy: True
