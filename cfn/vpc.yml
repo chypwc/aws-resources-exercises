@@ -187,55 +187,55 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable1
       NatGatewayId: !Ref NATGateway1 # Use NAT Gateway 1 for outbound traffic
 
-# Associate Private Subnet 1 with its route table (PrivateRouteTable1)
-PrivateSubnet1RouteTableAssociation:
-  Type: "AWS::EC2::SubnetRouteTableAssociation"
-  Properties:
-    RouteTableId: !Ref PrivateRouteTable1
-    SubnetId: !Ref PrivateSubnet1
+  # Associate Private Subnet 1 with its route table (PrivateRouteTable1)
+  PrivateSubnet1RouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet1
 
-# Create a separate route table for Private Subnet 2
-PrivateRouteTable2:
-  Type: "AWS::EC2::RouteTable"
-  Properties:
-    VpcId: !Ref VPC
-    Tags:
-      - Key: Name
-        Value: PrivateRouteTable2
+  # Create a separate route table for Private Subnet 2
+  PrivateRouteTable2:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: PrivateRouteTable2
 
-# Create default route in PrivateRouteTable2 to allow outbound internet traffic via NAT Gateway 2
-DefaultPrivateRoute2:
-  Type: "AWS::EC2::Route"
-  Properties:
-    DestinationCidrBlock: 0.0.0.0/0 # Allow outbound internet traffic
-    RouteTableId: !Ref PrivateRouteTable2
-    NatGatewayId: !Ref NATGateway2 # Use NAT Gateway 2 for Private Subnet 2
+  # Create default route in PrivateRouteTable2 to allow outbound internet traffic via NAT Gateway 2
+  DefaultPrivateRoute2:
+    Type: "AWS::EC2::Route"
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0 # Allow outbound internet traffic
+      RouteTableId: !Ref PrivateRouteTable2
+      NatGatewayId: !Ref NATGateway2 # Use NAT Gateway 2 for Private Subnet 2
 
-# Associate Private Subnet 2 with PrivateRouteTable2
-PrivateSubnet2RouteTableAssociation:
-  Type: "AWS::EC2::SubnetRouteTableAssociation"
-  Properties:
-    RouteTableId: !Ref PrivateRouteTable2
-    SubnetId: !Ref PrivateSubnet2
+  # Associate Private Subnet 2 with PrivateRouteTable2
+  PrivateSubnet2RouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet2
 
-# Create a VPC endpoint for Amazon S3 to allow private subnets to access S3 without needing public internet
-S3Endpoint:
-  Type: "AWS::EC2::VPCEndpoint"
-  Properties:
-    PolicyDocument:
-      Version: 2012-10-17
-      Statement:
-        - Effect: Allow
-          Action: "*" # Allow all actions (you can restrict for tighter security)
-          Principal:
-            "*" # Allow all IAM principals
-            # - "s3:GetObject"
-            # - "s3:ListBucket"
-          Resource: "*" # Applies to all S3 buckets (or can be narrowed down)
-          #   - "arn:aws:s3:::your-bucket-name/*"
-    RouteTableIds:
-      - !Ref PrivateRouteTable1 # Attach endpoint to both private route tables...
-      - !Ref PrivateRouteTable2
-      # - !Ref PublicRouteTable # ...and public route table if needed
-    ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3" # This will resolve to region-specific S3 service name
-    VpcId: !Ref VPC
+  # Create a VPC endpoint for Amazon S3 to allow private subnets to access S3 without needing public internet
+  S3Endpoint:
+    Type: "AWS::EC2::VPCEndpoint"
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: "*" # Allow all actions (you can restrict for tighter security)
+            Principal:
+              "*" # Allow all IAM principals
+              # - "s3:GetObject"
+              # - "s3:ListBucket"
+            Resource: "*" # Applies to all S3 buckets (or can be narrowed down)
+            #   - "arn:aws:s3:::your-bucket-name/*"
+      RouteTableIds:
+        - !Ref PrivateRouteTable1 # Attach endpoint to both private route tables...
+        - !Ref PrivateRouteTable2
+        # - !Ref PublicRouteTable # ...and public route table if needed
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3" # This will resolve to region-specific S3 service name
+      VpcId: !Ref VPC
