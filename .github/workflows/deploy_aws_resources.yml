@@ -25,6 +25,10 @@ on:
         description: "Deploy S3 Buckets Stack?"
         required: true
         default: "false"
+      deployRedshift:
+        description: "Deploy Redshift cluster?"
+        required: true
+        default: "false"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -68,6 +72,7 @@ jobs:
 
       - name: Deploy redshift
         id: redshift
+        if: ${{ github.event.inputs.deployRedshift == 'true' }}
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
         with:
           name: redshift
@@ -76,3 +81,9 @@ jobs:
             SourceBucketName=${{ github.event.inputs.SourceBucketName }},
             DataBucketName=${{ github.event.inputs.DataBucketName }}
           capabilities: CAPABILITY_NAMED_IAM
+
+      - name: Upload CSV files to S3 Source Bucket
+        id: upload-data
+        run: |
+          echo "Uploading CSV files to s3://${{ github.event.inputs.SourceBucketName }}/input/"
+          aws s3 cp ./data/ s3://${{ github.event.inputs.SourceBucketName }}/input/ --recursive --exclude "*" --include "*.csv"
