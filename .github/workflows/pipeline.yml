@@ -40,6 +40,14 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
+      - name: Install dbt and dbt-redshift
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install dbt-core dbt-redshift
+          echo "✅ dbt and dbt-redshift installed."
+
       - name: Setup dbt profile using Secrets Manager
         run: pipeline/dbt-profiles.sh
         env:
