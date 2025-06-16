@@ -16,21 +16,24 @@ Mappings:
       nodeCount: 2 # Number of nodes if multi-node
 
 Resources:
+  # Create a security group dedicated to the Redshift cluster
   RedShiftSG:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
       GroupDescription: "Security group for Redshift cluster"
-      VpcId: !Ref VPC
+      VpcId: !Ref VPC # Attach the security group to the specified VPC
 
+  # Allow all TCP traffic within the Redshift security group (node-to-node communication)
   RedshiftSGIngressSelfAllTcp:
     Type: "AWS::EC2::SecurityGroupIngress"
     Properties:
-      GroupId: !Ref RedShiftSG
+      GroupId: !Ref RedShiftSG # Target security group
       IpProtocol: tcp
       FromPort: 0
       ToPort: 65535
-      SourceSecurityGroupId: !Ref RedShiftSG
+      SourceSecurityGroupId: !Ref RedShiftSG # Source is the same SG (self-referencing rule)
 
+  # Allow all UDP traffic within the Redshift security group (used for cluster internals)
   RedshiftSGIngressSelfAllUdp:
     Type: "AWS::EC2::SecurityGroupIngress"
     Properties:
@@ -40,14 +43,16 @@ Resources:
       ToPort: 65535
       SourceSecurityGroupId: !Ref RedShiftSG
 
+  # Define a subnet group to tell Redshift which private subnets it can launch into
   RedshiftSubnetGroup:
     Type: "AWS::Redshift::ClusterSubnetGroup"
     Properties:
       Description: "Redshift cluster subnet group"
       SubnetIds:
-        - !Ref PrivateSubnet1
-        - !Ref PrivateSubnet2
+        - !Ref PrivateSubnet1 # First private subnet
+        - !Ref PrivateSubnet2 # Second private subnet
 
+  # Optional: Create a parameter group for Redshift to customize DB-level settings
   RedshiftClusterParameterGroup:
     Type: "AWS::Redshift::ClusterParameterGroup"
     Properties:
@@ -56,8 +61,9 @@ Resources:
           " ",
           [!Ref "AWS::StackName", " - Redshift Cluster Parameter group"],
         ]
-      ParameterGroupFamily: redshift-1.0
+      ParameterGroupFamily: redshift-1.0 # Family name must match Redshift engine version
 
+  # Store Redshift master user credentials securely in AWS Secrets Manager
   RedshiftCreds:
     Type: "AWS::SecretsManager::Secret"
     Properties:
@@ -66,108 +72,135 @@ Resources:
         SecretStringTemplate: !Join
           - ""
           - - '{"username":"'
-            - !FindInMap [ClusterConfigurations, redshift, userName]
+            - !FindInMap [ClusterConfigurations, redshift, userName] # From Mappings section
             - '"}'
-        GenerateStringKey: "password"
-        PasswordLength: 16
-        ExcludePunctuation: true
+        GenerateStringKey: "password" # Key to generate the secret value
+        PasswordLength: 16 # Secure password length
+        ExcludePunctuation: true # Avoid special characters for compatibility
       Tags:
         - Key: RedshiftGlueBlogCred
-          Value: "true"
+          Value: "true" # Tag useful for filtering secrets for Glue/Redshift integration
 
-  RedshiftIamRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - redshift.amazonaws.com
-                - glue.amazonaws.com
-            Action: "sts:AssumeRole"
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
-        # These are inline policies which we define manually --- delete this lines  while using in cloud formation
-      Policies:
-        - PolicyName: Redshift-IAM-Policy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Sid: AllowAccesstoDataBucket
-                Effect: Allow
-                Action:
-                  - "s3:AbortMultipartUpload"
-                  - "s3:DeleteObject"
-                  - "s3:GetBucketVersioning"
-                  - "s3:GetObject"
-                  - "s3:GetObjectTagging"
-                  - "s3:GetObjectVersion"
-                  - "s3:ListBucket"
-                  - "s3:ListBucketMultipartUploads"
-                  - "s3:ListBucketVersions"
-                  - "s3:ListMultipartUploadParts"
-                  - "s3:PutBucketVersioning"
-                  - "s3:PutObject"
-                  - "s3:PutObjectTagging"
-                Resource:
-                  - !Sub "arn:aws:s3:::${DataBucketName}"
-                  - !Sub "arn:aws:s3:::${DataBucketName}/*"
-                  - !Sub "arn:aws:s3:::${SourceBucketName}"
-                  - !Sub "arn:aws:s3:::${SourceBucketName}/*"
-              - Sid: ListPermissions
-                Effect: Allow
-                Action:
-                  - "s3:ListBucket"
-                Resource:
-                  - "*"
-              - Sid: AllowIAMPass
-                Effect: Allow
-                Action:
-                  - "iam:GetRole"
-                  - "iam:PassRole"
-                Resource:
-                  - "*"
+  # IAM Role for Redshift and Glue to access S3 buckets and assume necessary permissions
+RedshiftIamRole:
+  Type: "AWS::IAM::Role"
+  Properties:
+    # Trust policy: allow Redshift and Glue to assume this role
+    AssumeRolePolicyDocument:
+      Version: 2012-10-17
+      Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              - redshift.amazonaws.com # Allow Redshift service
+              - glue.amazonaws.com # Allow Glue service
+          Action: "sts:AssumeRole" # Required to allow service to assume role
 
+    # Attach managed policy for Glue service role (optional convenience)
+    ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+
+    # Inline policies grant specific S3 access and IAM permissions for Redshift and Glue
+    Policies:
+      - PolicyName: Redshift-IAM-Policy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            # Allow Redshift/Glue to access specific S3 buckets for reading and writing
+            - Sid: AllowAccesstoDataBucket
+              Effect: Allow
+              Action:
+                - "s3:AbortMultipartUpload"
+                - "s3:DeleteObject"
+                - "s3:GetBucketVersioning"
+                - "s3:GetObject"
+                - "s3:GetObjectTagging"
+                - "s3:GetObjectVersion"
+                - "s3:ListBucket"
+                - "s3:ListBucketMultipartUploads"
+                - "s3:ListBucketVersions"
+                - "s3:ListMultipartUploadParts"
+                - "s3:PutBucketVersioning"
+                - "s3:PutObject"
+                - "s3:PutObjectTagging"
+              Resource:
+                - !Sub "arn:aws:s3:::${DataBucketName}" # Data bucket
+                - !Sub "arn:aws:s3:::${DataBucketName}/*" # All objects in data bucket
+                - !Sub "arn:aws:s3:::${SourceBucketName}" # Source bucket
+                - !Sub "arn:aws:s3:::${SourceBucketName}/*" # All objects in source bucket
+
+            # Allow listing any S3 bucket (needed for generic Glue jobs or Redshift Spectrum)
+            - Sid: ListPermissions
+              Effect: Allow
+              Action:
+                - "s3:ListBucket"
+              Resource:
+                - "*"
+
+            # Allow the Redshift/Glue service to get and pass IAM roles (common in data pipelines)
+            - Sid: AllowIAMPass
+              Effect: Allow
+              Action:
+                - "iam:GetRole"
+                - "iam:PassRole"
+              Resource:
+                - "*"
+
+  # Glue connection to Redshift using JDBC — enables Glue jobs to communicate with Redshift
 GlueRedshiftConnection:
   Type: AWS::Glue::Connection
   Properties:
+    # The AWS account ID under which to create the Glue connection
     CatalogId: !Ref AWS::AccountId
+
     ConnectionInput:
+      # Type of connection - JDBC for Redshift
       ConnectionType: JDBC
+
+      # Logical name of the Glue connection
       Name: redshift-demo-connection
+
+      # Network details: place the connection inside a private subnet with access to Redshift
       PhysicalConnectionRequirements:
+        # Attach the Redshift security group to enable connectivity
         SecurityGroupIdList:
           - !Ref RedShiftSG
+
+        # Specify the private subnet that can access Redshift
         SubnetId: !Ref PrivateSubnet1
+
+        # Select the first Availability Zone (AZ) from the region to place the connection in
         AvailabilityZone: !Select
           - 0
           - !GetAZs
             Ref: "AWS::Region"
-      ConnectionProperties:
-        {
-          "JDBC_CONNECTION_URL":
-            !Join [
+
+      # JDBC connection configuration, including secret resolution for credentials
+      ConnectionProperties: {
+          # Compose Redshift JDBC URL using dynamic values
+          "JDBC_CONNECTION_URL": !Join [
               "",
               [
-                "jdbc:redshift://",
-                !GetAtt RedshiftCluster.Endpoint.Address,
+                "jdbc:redshift://", # Prefix
+                !GetAtt RedshiftCluster.Endpoint.Address, # Hostname
                 ":",
-                !GetAtt RedshiftCluster.Endpoint.Port,
+                !GetAtt RedshiftCluster.Endpoint.Port, # Port
                 "/",
-                !FindInMap [ClusterConfigurations, redshift, dbName],
+                !FindInMap [ClusterConfigurations, redshift, dbName], # DB name from Mapping
               ],
             ],
-          "USERNAME":
-            !Join [
+
+          # Resolve username from AWS Secrets Manager
+          "USERNAME": !Join [
               "",
               [
-                "{{resolve:secretsmanager:",
-                !Ref RedshiftCreds,
-                ":SecretString:username}}",
+                "{{resolve:secretsmanager:", # Secrets Manager dynamic reference
+                !Ref RedshiftCreds, # Reference to secret created earlier
+                ":SecretString:username}}", # Get 'username' key
               ],
             ],
+
+          # Resolve password from AWS Secrets Manager
           "PASSWORD":
             !Join [
               "",
