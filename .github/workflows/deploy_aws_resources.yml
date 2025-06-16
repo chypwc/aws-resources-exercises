@@ -54,6 +54,6 @@ jobs:
           name: s3-buckets
           template: cfn/s3.yml
           parameter-overrides: >-
-            SourceBucketName=${{ github.event.inputs.SourceBucketName }}
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
             DataBucketName=${{ github.event.inputs.DataBucketName }}
           capabilities: CAPABILITY_NAMED_IAM
