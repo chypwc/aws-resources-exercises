@@ -44,8 +44,9 @@ Resources:
                   - !Sub "arn:aws:s3:::${SourceBucketName}/*"
               - Effect: Allow
                 Action:
-                  - glue:CreateTable
+                  - glue:CreateDatabase
                   - glue:GetDatabase
+                  - glue:CreateTable
                   - glue:UpdateTable
                 Resource: "*"
         - PolicyName: GlueCloudWatchLogs
