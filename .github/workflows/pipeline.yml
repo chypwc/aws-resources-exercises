@@ -1,0 +1,80 @@
+name: Data Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: "AWS Region"
+        required: true
+        default: "ap-southeast-2"
+      SourceBucketName:
+        description: "S3 Source Bucket Name"
+        default: "source-bucket-chien"
+        required: true
+      DataBucketName:
+        description: "S3 Data Bucket Name"
+        default: "data-bucket-chien"
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        id: creds-pipeline
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ github.event.inputs.region }}
+
+      - name: Run ingestion script
+        run: |
+          bash pipeline/ingest.sh
+        env:
+          SourceBucketName: ${{ github.event.inputs.SourceBucketName }}
+          CrawlerName: source-csv-crawler
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Setup dbt profile using Secrets Manager
+        run: |
+          echo "🔐 Fetching Redshift credentials from Secrets Manager..."
+          SECRET=$(aws secretsmanager get-secret-value \
+            --secret-id RedshiftCreds \
+            --query SecretString \
+            --output text)
+
+          USERNAME=$(echo "$SECRET" | jq -r .username)
+          PASSWORD=$(echo "$SECRET" | jq -r .password)
+
+          echo "🔍 Getting Redshift endpoint..."
+          HOST=$(aws redshift describe-clusters \
+            --cluster-identifier redshift-demo-cluster \
+            --query "Clusters[0].Endpoint.Address" \
+            --output text)
+
+          echo "🛠️ Creating ~/.dbt/profiles.yml..."
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOF
+default:
+  target: dev
+  outputs:
+    dev:
+      type: redshift
+      host: $HOST
+      user: $USERNAME
+      password: $PASSWORD
+      port: 5439
+      dbname: dev
+      schema: public
+      threads: 1
+      ssl: true
+EOF
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ github.event.inputs.region }}

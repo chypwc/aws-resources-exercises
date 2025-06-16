@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "Uploading CSV files to s3://${SourceBucketName}/input/"
-aws s3 cp ./data/ s3://${SourceBucketName}/input/ --recursive --exclude "*" --include "*.csv"
+# echo "Uploading CSV files to s3://${SourceBucketName}/input/"
+# aws s3 cp ./data/ s3://${SourceBucketName}/input/ --recursive --exclude "*" --include "*.csv"
 
 echo "Triggering AWS Glue crawler..."
 aws glue start-crawler --name "${CrawlerName}"

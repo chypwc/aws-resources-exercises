@@ -19,6 +19,7 @@ Resources:
   RedshiftCluster:
     Type: AWS::Redshift::Cluster
     Properties:
+      ClusterIdentifier: redshift-demo-cluster
       ClusterType: !FindInMap [ClusterConfigurations, redshift, clusterType]
       NodeType: !FindInMap [ClusterConfigurations, redshift, nodeType]
       # NumberOfNodes: !FindInMap [ClusterConfigurations, redshift, nodeCount]
