@@ -1,40 +1,27 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 echo "Uploading CSV files to s3://${SourceBucketName}/input/"
 aws s3 cp ./data/ s3://${SourceBucketName}/input/ --recursive --exclude "*" --include "*.csv"
 
 echo "Triggering AWS Glue crawler..."
-aws glue start-crawler --name ${CrawlerName}
+aws glue start-crawler --name "${CrawlerName}"
 
 echo "Waiting for crawler to complete..."
-status=""
-crawl_status=""
-count=0
-max_attempts=60
 
-while [[ "$crawl_status" != "SUCCEEDED" && $count -lt $max_attempts ]]; do
-  status=$(aws glue get-crawler --name ${CrawlerName} --query 'Crawler.State' --output text)
-  crawl_status=$(aws glue get-crawler-metrics --crawler-name-list ${CrawlerName} \
-                  --query "CrawlerMetricsList[0].LastRuntimeSuccessful" --output text)
+for i in {1..60}; do
+  STATE=$(aws glue get-crawler --name "${CrawlerName}" --query 'Crawler.State' --output text || echo "UNKNOWN")
+  LAST_STATUS=$(aws glue get-crawler --name "${CrawlerName}" --query 'Crawler.LastCrawl.Status' --output text || echo "NONE")
 
-  echo "Crawler state: $status"
-  echo "Last successful crawl time: $crawl_status"
+  echo "[$i] Crawler state: $STATE | Last crawl status: $LAST_STATUS"
 
-  if [[ "$status" == "READY" ]]; then
-    last_crawl_status=$(aws glue get-crawler --name ${CrawlerName} \
-      --query 'Crawler.LastCrawl.Status' --output text)
-    echo "LastCrawl.Status: $last_crawl_status"
-
-    if [[ "$last_crawl_status" == "SUCCEEDED" ]]; then
-      echo "✅ Crawler completed successfully."
-      exit 0
-    fi
+  if [[ "$STATE" == "READY" && "$LAST_STATUS" == "SUCCEEDED" ]]; then
+    echo "✅ Crawler finished successfully."
+    exit 0
   fi
 
   sleep 10
-  ((count++))
 done
 
-echo "❌ Crawler did not finish successfully within expected time."
+echo "❌ Timeout waiting for crawler to complete."
 exit 1
