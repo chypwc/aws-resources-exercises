@@ -109,6 +109,7 @@ jobs:
 
       - name: Run ingestion script
         run: |
+          chmod +x pipeline/ingest.sh
           bash pipeline/ingest.sh
         env:
           SourceBucketName: ${{ github.event.inputs.SourceBucketName }}
