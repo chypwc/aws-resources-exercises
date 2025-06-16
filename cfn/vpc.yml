@@ -29,6 +29,14 @@ Parameters:
     Default: 10.0.4.0/24
     Description: CIDR block for private subnet 2
 
+  SourceBucketName:
+    Type: String
+    Description: Name of the source S3 bucket
+
+  DataBucketName:
+    Type: String
+    Description: Name of the data S3 bucket
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -197,7 +205,18 @@ Resources:
           - Effect: Allow
             Principal: "*"
             Action: "s3:*"
-            Resource: "*"
+            Resource:
+              - !Sub "arn:aws:s3:::${SourceBucketName}"
+              - !Sub "arn:aws:s3:::${SourceBucketName}/*"
+              - !Sub "arn:aws:s3:::${DataBucketName}"
+              - !Sub "arn:aws:s3:::${DataBucketName}/*"
+
+  VPCDefaultSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt VPC.DefaultSecurityGroup
+      IpProtocol: -1
+      CidrIp: !Ref VpcCidr
 
 # Exporting Values to Other Stacks
 Outputs:

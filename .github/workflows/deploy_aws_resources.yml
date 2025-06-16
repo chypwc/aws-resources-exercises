@@ -46,6 +46,9 @@ jobs:
           name: vpc-stack
           template: cfn/vpc.yml
           capabilities: CAPABILITY_NAMED_IAM
+          parameter-overrides: >-
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
+            DataBucketName=${{ github.event.inputs.DataBucketName }}
 
       - name: Deploy S3 Buckets CloudFormation Stacks
         id: s3-buckets

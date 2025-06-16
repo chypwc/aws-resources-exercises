@@ -26,3 +26,12 @@ Resources:
         BlockPublicPolicy: True
         IgnorePublicAcls: True
         RestrictPublicBuckets: True
+
+Outputs:
+  SourceBucketOutput:
+    Description: Source bucket name
+    Value: !Ref SourceBucketName
+
+  DataBucketOutput:
+    Description: Data bucket name
+    Value: !Ref DataBucketName
