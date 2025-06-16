@@ -48,7 +48,11 @@ Resources:
                   - glue:GetDatabase
                   - glue:CreateTable
                   - glue:UpdateTable
-                Resource: "*"
+                  - glue:GetTable
+                Resource:
+                  - !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog"
+                  - !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/source_data_db"
+                  - !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/source_data_db/*"
         - PolicyName: GlueCloudWatchLogs
           PolicyDocument:
             Version: "2012-10-17"
