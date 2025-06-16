@@ -60,3 +60,14 @@ jobs:
             SourceBucketName=${{ github.event.inputs.SourceBucketName }},
             DataBucketName=${{ github.event.inputs.DataBucketName }}
           capabilities: CAPABILITY_NAMED_IAM
+
+      - name: Deploy redshift
+        id: redshift
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        with:
+          name: redshift
+          template: cfn/redshift.yml
+          parameter-overrides: >-
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
+            DataBucketName=${{ github.event.inputs.DataBucketName }}
+          capabilities: CAPABILITY_NAMED_IAM

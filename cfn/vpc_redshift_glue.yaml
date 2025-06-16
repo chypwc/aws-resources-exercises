@@ -1,5 +1,4 @@
 Resources:
-  
   VPCDefaultSecurityGroupIngress:
     Type: "AWS::EC2::SecurityGroupIngress"
     Properties:
@@ -157,6 +156,7 @@ Resources:
         - !GetAtt RedshiftIamRole.Arn
       ClusterSubnetGroupName: !Ref RedshiftSubnetGroup
       ClusterParameterGroupName: !Ref RedshiftClusterParameterGroup
+
   GlueRedshiftConnection:
     Type: AWS::Glue::Connection
     Properties:
