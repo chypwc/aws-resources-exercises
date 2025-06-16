@@ -87,7 +87,7 @@ jobs:
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
         with:
           name: glue-crawler
-          template: cfn/glue.yml
+          template: cfn/glue-crawler.yml
           capabilities: CAPABILITY_NAMED_IAM
           parameter-overrides: >-
             SourceBucketName=${{ github.event.inputs.SourceBucketName }}
