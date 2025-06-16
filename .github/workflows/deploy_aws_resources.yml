@@ -73,6 +73,9 @@ jobs:
           name: redshift
           template: cfn/redshift.yml
           parameter-overrides: >-
+            VPC=${{ steps.vpc-stack.outputs.VPCId }},
+            PrivateSubnet1=${{ steps.vpc-stack.outputs.PrivateSubnet1 }},
+            PrivateSubnet2=${{ steps.vpc-stack.outputs.PrivateSubnet2 }},
             SourceBucketName=${{ github.event.inputs.SourceBucketName }},
             DataBucketName=${{ github.event.inputs.DataBucketName }}
           capabilities: CAPABILITY_NAMED_IAM

@@ -5,6 +5,15 @@ Parameters:
   DataBucketName:
     Type: String
     Description: Name of the source S3 bucket
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: First private subnet for Redshift
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet::Id
+    Description: Second private subnet for Redshift
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID for Redshift resources
 
 Mappings:
   ClusterConfigurations: # Settings for Redshift cluster

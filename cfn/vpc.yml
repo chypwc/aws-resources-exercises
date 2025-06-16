@@ -221,13 +221,19 @@ Resources:
 # Exporting Values to Other Stacks
 Outputs:
   VPCId:
-    Value: !Ref VPC
     Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: ${AWS::StackName}-VPCId
 
-  PublicSubnetIds:
-    Value: !Join [",", [!Ref PublicSubnet1, !Ref PublicSubnet2]]
-    Description: Public subnet IDs
+  PrivateSubnet1:
+    Description: First private subnet ID
+    Value: !Ref PrivateSubnet1
+    Export:
+      Name: ${AWS::StackName}-PrivateSubnet1
 
-  PrivateSubnetIds:
-    Value: !Join [",", [!Ref PrivateSubnet1, !Ref PrivateSubnet2]]
-    Description: Private subnet IDs
+  PrivateSubnet2:
+    Description: Second private subnet ID
+    Value: !Ref PrivateSubnet2
+    Export:
+      Name: ${AWS::StackName}-PrivateSubnet2
