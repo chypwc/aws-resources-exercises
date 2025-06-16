@@ -9,7 +9,7 @@ Resources:
     Properties:
       Name: source-csv-crawler
       Role: !GetAtt GlueCrawlerRole.Arn
-      DatabaseName: source_data_db
+      DatabaseName: sales_db
       Targets:
         S3Targets:
           - Path: !Sub "s3://${SourceBucketName}/input/"
