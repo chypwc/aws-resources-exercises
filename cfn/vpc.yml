@@ -1,0 +1,241 @@
+# Description of the CloudFormation stack
+Description: >-
+  AWS ETL using Apache Spark
+
+# Define reusable values using Mappings (CIDR ranges, cluster configs, etc.)
+Mappings:
+  SubnetConfig: # Network CIDR blocks for the VPC and subnets
+    VPC:
+      CIDR: 10.0.0.0/16 # The full IP range for the VPC
+    Public1:
+      CIDR: 10.0.10.0/24 # IP range for first public subnet
+    Public2:
+      CIDR: 10.0.11.0/24 # IP range for second public subnet
+    Private1:
+      CIDR: 10.0.20.0/24 # IP range for first private subnet
+    Private2:
+      CIDR: 10.0.21.0/24 # IP range for second private subnet
+
+Resources:
+  # VPC definition
+  VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: !FindInMap [SubnetConfig, VPC, CIDR]
+      InstanceTenancy: default
+      EnableDnsSupport: "true"
+      EnableDnsHostnames: "true"
+      Tags:
+        - Key: Name
+          Value: Default-VPC
+        - Key: for-use-with-glue-redshift-blog
+          Value: "true"
+
+  # Internet Gateway for outbound access
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: Name
+          Value: IG
+
+  # Attach Internet Gateway to VPC
+  VPCGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # Public Subnet 1 in first availability zone
+  PublicSubnet1:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      CidrBlock: !FindInMap [SubnetConfig, Public1, CIDR]
+      MapPublicIpOnLaunch: "true"
+      AvailabilityZone: !Select [0, !GetAZs Ref: "AWS::Region"]
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: PublicSubnet1
+        - Key: for-use-with-glue-redshift-blog
+          Value: "true"
+
+  # Public Subnet 2 in second availability zone
+  PublicSubnet2:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      CidrBlock: !FindInMap [SubnetConfig, Public2, CIDR]
+      MapPublicIpOnLaunch: "true"
+      AvailabilityZone: !Select [1, !GetAZs Ref: "AWS::Region"]
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: PublicSubnet2
+        - Key: for-use-with-glue-redshift-blog
+          Value: "true"
+
+  # Private Subnet 1 in first AZ (no public IPs)
+  PrivateSubnet1:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      CidrBlock: !FindInMap [SubnetConfig, Private1, CIDR]
+      AvailabilityZone: !Select [0, !GetAZs Ref: "AWS::Region"]
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet1
+        - Key: for-use-with-glue-redshift-blog
+          Value: "true"
+
+  # Private Subnet 2 in second AZ
+  PrivateSubnet2:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      CidrBlock: !FindInMap [SubnetConfig, Private2, CIDR]
+      AvailabilityZone: !Select [1, !GetAZs Ref: "AWS::Region"]
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet2
+        - Key: for-use-with-glue-redshift-blog
+          Value: "true"
+
+  # Allocate Elastic IP for NAT Gateway 1 (in Public Subnet 1)
+  NATGateway1EIP:
+    Type: "AWS::EC2::EIP"
+    DependsOn: VPCGatewayAttachment # Ensure the Internet Gateway is attached first
+    Properties:
+      Domain: vpc # This EIP is used in a VPC context
+
+  # Allocate Elastic IP for NAT Gateway 2 (in Public Subnet 2)
+  NATGateway2EIP:
+    Type: "AWS::EC2::EIP"
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  # Create NAT Gateway 1 in Public Subnet 1
+  NATGateway1:
+    Type: "AWS::EC2::NatGateway"
+    Properties:
+      SubnetId: !Ref PublicSubnet1 # Place NAT in public subnet so it can access internet
+      AllocationId: !GetAtt
+        - NATGateway1EIP # Use the allocated Elastic IP
+        - AllocationId
+      Tags:
+        - Key: Name
+          Value: NAT-Gateway1
+
+  # Create NAT Gateway 2 in Public Subnet 2
+  NATGateway2:
+    Type: "AWS::EC2::NatGateway"
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      AllocationId: !GetAtt
+        - NATGateway2EIP
+        - AllocationId
+      Tags:
+        - Key: Name
+          Value: NAT-Gateway2
+
+  # Public route table to route traffic from public subnets to the internet
+  PublicRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: PublicRouteTable
+
+  # Add default route in the public route table pointing to the Internet Gateway
+  DefaultPublicRoute:
+    Type: "AWS::EC2::Route"
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0 # Route all outbound traffic
+      RouteTableId: !Ref PublicRouteTable
+      GatewayId: !Ref InternetGateway
+
+  # Associate PublicSubnet1 with the public route table
+  PublicSubnet1RouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  # Associate PublicSubnet2 with the public route table
+  PublicSubnet2RouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+
+  # Private route table for Private Subnet 1
+  PrivateRouteTable1:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: PrivateRouteTable1
+
+  # Default route from Private Subnet 1 to internet via NAT Gateway 1
+  DefaultPrivateRoute1:
+    Type: "AWS::EC2::Route"
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0 # Allow internet access via NAT
+      RouteTableId: !Ref PrivateRouteTable1
+      NatGatewayId: !Ref NATGateway1 # Use NAT Gateway 1 for outbound traffic
+
+# Associate Private Subnet 1 with its route table (PrivateRouteTable1)
+PrivateSubnet1RouteTableAssociation:
+  Type: "AWS::EC2::SubnetRouteTableAssociation"
+  Properties:
+    RouteTableId: !Ref PrivateRouteTable1
+    SubnetId: !Ref PrivateSubnet1
+
+# Create a separate route table for Private Subnet 2
+PrivateRouteTable2:
+  Type: "AWS::EC2::RouteTable"
+  Properties:
+    VpcId: !Ref VPC
+    Tags:
+      - Key: Name
+        Value: PrivateRouteTable2
+
+# Create default route in PrivateRouteTable2 to allow outbound internet traffic via NAT Gateway 2
+DefaultPrivateRoute2:
+  Type: "AWS::EC2::Route"
+  Properties:
+    DestinationCidrBlock: 0.0.0.0/0 # Allow outbound internet traffic
+    RouteTableId: !Ref PrivateRouteTable2
+    NatGatewayId: !Ref NATGateway2 # Use NAT Gateway 2 for Private Subnet 2
+
+# Associate Private Subnet 2 with PrivateRouteTable2
+PrivateSubnet2RouteTableAssociation:
+  Type: "AWS::EC2::SubnetRouteTableAssociation"
+  Properties:
+    RouteTableId: !Ref PrivateRouteTable2
+    SubnetId: !Ref PrivateSubnet2
+
+# Create a VPC endpoint for Amazon S3 to allow private subnets to access S3 without needing public internet
+S3Endpoint:
+  Type: "AWS::EC2::VPCEndpoint"
+  Properties:
+    PolicyDocument:
+      Version: 2012-10-17
+      Statement:
+        - Effect: Allow
+          Action: "*" # Allow all actions (you can restrict for tighter security)
+          Principal:
+            "*" # Allow all IAM principals
+            # - "s3:GetObject"
+            # - "s3:ListBucket"
+          Resource: "*" # Applies to all S3 buckets (or can be narrowed down)
+          #   - "arn:aws:s3:::your-bucket-name/*"
+    RouteTableIds:
+      - !Ref PrivateRouteTable1 # Attach endpoint to both private route tables...
+      - !Ref PrivateRouteTable2
+      # - !Ref PublicRouteTable # ...and public route table if needed
+    ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3" # This will resolve to region-specific S3 service name
+    VpcId: !Ref VPC
