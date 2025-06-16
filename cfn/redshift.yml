@@ -12,8 +12,8 @@ Mappings:
       userName: redshiftmasteruser
       dbName: dev
       nodeType: dc2.large # Redshift instance type
-      clusterType: multi-node # Set to 'multi-node' or 'single-node'
-      nodeCount: 2 # Number of nodes if multi-node
+      clusterType: single-node # Set to 'multi-node' or 'single-node'
+      nodeCount: 1 # Number of nodes if multi-node
 
 Resources:
   RedshiftCluster:
