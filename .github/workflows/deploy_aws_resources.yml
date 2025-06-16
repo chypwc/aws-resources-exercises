@@ -11,7 +11,7 @@ on:
         default: "ap-southeast-2"
       SourceBucketName:
         description: "S3 Source Bucket Name"
-        default: source-bucket-chien"
+        default: "source-bucket-chien"
         required: true
       DataBucketName:
         description: "S3 Data Bucket Name"
@@ -46,10 +46,9 @@ jobs:
         id: s3-buckets
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
         with:
-          name: s3-buckets
-          template: cfn/s3.yml
-          parameter-overrides: >-
-            # SourceBucketName=source-bucket-chien
-            # DataBucketName=data-bucket-chien
+            name: s3-buckets
+            template: cfn/s3.yml
+            parameter-overrides: >-
             SourceBucketName=${{ github.event.inputs.SourceBucketName }}
             DataBucketName=${{ github.event.inputs.DataBucketName }}
+            capabilities: CAPABILITY_NAMED_IAM

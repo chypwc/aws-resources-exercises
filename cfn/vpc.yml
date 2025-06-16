@@ -199,6 +199,7 @@ Resources:
             Action: "s3:*"
             Resource: "*"
 
+# Exporting Values to Other Stacks
 Outputs:
   VPCId:
     Value: !Ref VPC
