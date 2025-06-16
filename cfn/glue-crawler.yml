@@ -48,3 +48,16 @@ Resources:
                   - glue:GetDatabase
                   - glue:UpdateTable
                 Resource: "*"
+        - PolicyName: GlueCloudWatchLogs
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-glue/crawlers"
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-glue/crawlers:log-stream:*"
