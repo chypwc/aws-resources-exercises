@@ -166,6 +166,15 @@ Resources:
                 Resource:
                   - "*"
 
+              # Allow logging to CloudWatch
+              - Sid: AllowCloudWatchLogs
+                Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+
     # Glue connection to Redshift using JDBC — enables Glue jobs to communicate with Redshift
   GlueRedshiftConnection:
     Type: AWS::Glue::Connection

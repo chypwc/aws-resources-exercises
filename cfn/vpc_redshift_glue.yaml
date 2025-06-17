@@ -157,6 +157,7 @@ Resources:
       ClusterSubnetGroupName: !Ref RedshiftSubnetGroup
       ClusterParameterGroupName: !Ref RedshiftClusterParameterGroup
 
+  #  defines a Glue connection to your Amazon Redshift cluster using JDBC
   GlueRedshiftConnection:
     Type: AWS::Glue::Connection
     Properties:
