@@ -49,10 +49,11 @@ Resources:
                   - glue:CreateTable
                   - glue:UpdateTable
                   - glue:GetTable
+                  - glue:BatchGetPartition
                 Resource:
                   - !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog"
-                  - !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/source_data_db"
-                  - !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/source_data_db/*"
+                  - !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/*"
+                  - !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/*"
         - PolicyName: GlueCloudWatchLogs
           PolicyDocument:
             Version: "2012-10-17"
@@ -65,7 +66,9 @@ Resources:
 
               - Effect: Allow
                 Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-glue/crawlers:log-stream:*"
-                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-glue/crawlers:*:log-stream:*"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-glue/crawlers*"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-glue/crawlers*:log-stream:*"
