@@ -218,6 +218,15 @@ Resources:
       IpProtocol: -1
       CidrIp: !Ref VpcCidr
 
+  GlueJobSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow Glue to access Redshift
+      VpcId: !ImportValue vpc-stack-VPCId
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: "0.0.0.0/0"
+
 # Exporting Values to Other Stacks
 Outputs:
   VPCId:
@@ -234,3 +243,9 @@ Outputs:
     Value: !Ref PrivateSubnet2
     Export:
       Name: vpc-stack-PrivateSubnet2
+
+  GlueJobSecurityGroupId:
+    Description: "Security Group ID for Glue Job"
+    Value: !Ref GlueJobSG
+    Export:
+      Name: GlueJobSG
