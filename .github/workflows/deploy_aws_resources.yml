@@ -109,7 +109,7 @@ jobs:
       - name: Upload Glue Script
         if: ${{ github.event.inputs.deployGlueJob == 'true' }}
         run: |
-          aws s3 cp scripts/sales_etl.py s3://${{ github.event.inputs.DataBucketName }}/scripts/
+          aws s3 cp scripts/sales_etl.py s3://${{ github.event.inputs.SourceBucketName }}/scripts/
 
       - name: Deploy Glue Job
         id: glue-job
