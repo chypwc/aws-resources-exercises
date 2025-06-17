@@ -34,6 +34,11 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
+              - Effect: Allow
+                Principal:
+                  Service: glue.amazonaws.com
+                Action: sts:AssumeRole
+
               # S3 Access (read/write for both buckets)
               - Effect: Allow
                 Action:
