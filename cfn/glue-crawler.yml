@@ -13,7 +13,7 @@ Resources:
       Targets:
         S3Targets:
           - Path: !Sub "s3://${SourceBucketName}/input/"
-      TablePrefix: source_
+      TablePrefix: ""
       SchemaChangePolicy:
         UpdateBehavior: UPDATE_IN_DATABASE
         DeleteBehavior: LOG
