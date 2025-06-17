@@ -37,6 +37,10 @@ on:
         description: "Deploy Glue Crawler?"
         required: true
         default: "false"
+      deployGlueJob:
+        description: "Deploy Glue Job?"
+        required: true
+        default: "false"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -101,3 +105,20 @@ jobs:
           capabilities: CAPABILITY_NAMED_IAM
           parameter-overrides: >-
             SourceBucketName=${{ github.event.inputs.SourceBucketName }}
+
+      - name: Deploy Glue Job
+        id: glue-job
+        if: ${{ github.event.inputs.deployGlueJob == 'true' }}
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        with:
+          name: glue-job
+          template: cfn/glue-job.yml
+          capabilities: CAPABILITY_NAMED_IAM
+          parameter-overrides: >-
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
+            DataBucketName=${{ github.event.inputs.DataBucketName }}
+
+      - name: Upload Glue Script
+        if: ${{ github.event.inputs.deployGlueJob == 'true' }}
+        run: |
+          aws s3 cp scripts/sales_etl.py s3://${{ github.event.inputs.DataBucketName }}/scripts/

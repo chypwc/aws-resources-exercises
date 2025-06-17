@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # echo "Uploading script files to s3://${SourceBucketName}/input/"
-aws s3 cp ./script/ s3://${SourceBucketName}/scripts/ --recursive --exclude "*" --include "*.py"
+# aws s3 cp ./script/ s3://${SourceBucketName}/scripts/ --recursive --exclude "*" --include "*.py"
 
 echo "Triggering AWS Glue crawler..."
 aws glue start-crawler --name "${CrawlerName}"

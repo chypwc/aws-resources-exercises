@@ -1,4 +1,7 @@
 Parameters:
+  SourceBucketName:
+    Description: Name the source Bucket
+    Type: String
   DataBucketName:
     Description: Name the data Bucket
     Type: String
@@ -11,7 +14,7 @@ Resources:
       Role: !GetAtt GlueServiceRole.Arn
       Command:
         Name: glueetl
-        ScriptLocation: !Sub "s3://${DataBucketName}/scripts/sales_etl.py"
+        ScriptLocation: !Sub "s3://${SourceBucketName}/scripts/sales_etl.py"
         PythonVersion: "3"
       GlueVersion: "3.0"
       DefaultArguments:

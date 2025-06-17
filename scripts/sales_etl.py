@@ -71,7 +71,7 @@ glueContext.write_dynamic_frame.from_jdbc_conf(
         "dbtable": "aggregated_sales",
         "database": "dev"
     },
-    redshift_tmp_dir="s3://your-temp-bucket/tmp/",
+    redshift_tmp_dir="s3://data-bucket-chien/tmp/",
     transformation_ctx="redshift_output"
 )
 
