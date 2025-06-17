@@ -41,6 +41,20 @@ Resources:
     Properties:
       GroupDescription: "Security group for Redshift cluster"
       VpcId: !ImportValue vpc-stack-VPCId # Attach the security group to the specified VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5439
+          ToPort: 5439
+          SourceSecurityGroupId: !Ref GlueJobSG
+
+  GlueJobSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow Glue to access Redshift
+      VpcId: !ImportValue vpc-stack-VPCId
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: "0.0.0.0/0"
 
   # Allow all TCP traffic within the Redshift security group (node-to-node communication)
   RedshiftSGIngressSelfAllTcp:
@@ -266,3 +280,9 @@ Outputs:
   RedshiftS3TempPath:
     Description: Temporary path used by Redshift to store data
     Value: !Join ["", ["s3://", !Ref DataBucketName, "/redshift-temp-dir/"]]
+
+  GlueJobSecurityGroupId:
+    Description: "Security Group ID for Glue Job"
+    Value: !Ref GlueJobSG
+    Export:
+      Name: GlueJobSG

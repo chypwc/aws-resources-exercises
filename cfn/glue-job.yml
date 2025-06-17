@@ -26,11 +26,20 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Tags:
+        - Key: Name
+          Value: GlueServiceRole
       Policies:
         - PolicyName: GlueCustomAccessPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
+              # Add this block to allow PassRole on itself for notebook
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt GlueServiceRole.Arn
+
               # S3 Access (read/write for both buckets)
               - Effect: Allow
                 Action:
@@ -66,6 +75,14 @@ Resources:
                   - glue:GetConnections
                 Resource: "*"
 
+              # to allow CodeWhisperer actions
+              - Effect": Allow
+                Action:
+                  - codewhisperer:GenerateRecommendations
+                  - codewhisperer:ListRecommendations
+                  - codewhisperer:GetRecommendation
+                Resource: "*"
+
   GlueJob:
     Type: AWS::Glue::Job
     Properties:
@@ -91,3 +108,8 @@ Resources:
       NumberOfWorkers: 5
       Tags:
         Environment: dev
+      VpcConfig:
+        SubnetId: !ImportValue vpc-stack-PrivateSubnet1
+        SecurityGroupIds:
+          - !ImportValue GlueJobSG # Define this SG to allow Redshift port (5439)
+

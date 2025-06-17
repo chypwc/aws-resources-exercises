@@ -17,7 +17,7 @@ job.init(args["JOB_NAME"], args)
 
 # Load DynamicFrame from AWS Glue Catalog
 dyf = glueContext.create_dynamic_frame.from_catalog(
-    database="salesdb",
+    database="sales_db",
     table_name="sales_records_csv"
 )
 
