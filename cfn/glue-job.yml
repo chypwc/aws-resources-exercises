@@ -34,12 +34,6 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              # Add this block to allow PassRole on itself for notebook
-              - Effect: Allow
-                Action:
-                  - iam:PassRole
-                Resource: !Ref GlueServiceRole
-
               # S3 Access (read/write for both buckets)
               - Effect: Allow
                 Action:
