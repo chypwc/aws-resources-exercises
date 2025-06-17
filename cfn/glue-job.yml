@@ -102,8 +102,3 @@ Resources:
       NumberOfWorkers: 5
       Tags:
         Environment: dev
-      VpcConfig:
-        SubnetId: !ImportValue vpc-stack-PrivateSubnet1
-        SecurityGroupIds:
-          - !ImportValue GlueJobSG # Define this SG to allow Redshift port (5439)
-
