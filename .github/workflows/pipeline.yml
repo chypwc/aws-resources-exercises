@@ -14,6 +14,10 @@ on:
       DataBucketName:
         description: "S3 Data Bucket Name"
         default: "data-bucket-chien"
+      deployGlueJob:
+        description: "Deploy Glue Job?"
+        required: true
+        default: "false"
 
 jobs:
   pipeline:

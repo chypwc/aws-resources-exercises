@@ -121,4 +121,6 @@ jobs:
           capabilities: CAPABILITY_NAMED_IAM
           parameter-overrides: >-
             SourceBucketName=${{ github.event.inputs.SourceBucketName }},
-            DataBucketName=${{ github.event.inputs.DataBucketName }}
+            DataBucketName=${{ github.event.inputs.DataBucketName }},
+            JobName=sales-aggregation-job,
+            ScriptName=sales_etl.py

@@ -5,6 +5,12 @@ Parameters:
   DataBucketName:
     Description: Name the data Bucket
     Type: String
+  ScriptName:
+    Description: Name the script
+    Type: String
+  JobName:
+    Description: Name the Glue Job
+    Type: String
 
 Resources:
   GlueServiceRole:
@@ -63,11 +69,11 @@ Resources:
   GlueJob:
     Type: AWS::Glue::Job
     Properties:
-      Name: sales-aggregation-job
+      Name: !Sub "${JobName}"
       Role: !GetAtt GlueServiceRole.Arn
       Command:
         Name: glueetl
-        ScriptLocation: !Sub "s3://${SourceBucketName}/scripts/sales_etl.py"
+        ScriptLocation: !Sub "s3://${SourceBucketName}/scripts/${ScriptName}"
         PythonVersion: "3"
       GlueVersion: "3.0"
       DefaultArguments:
