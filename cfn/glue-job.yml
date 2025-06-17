@@ -38,7 +38,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - iam:PassRole
-                Resource: !GetAtt GlueServiceRole.Arn
+                Resource: !GetAtt GlueServiceRole
 
               # S3 Access (read/write for both buckets)
               - Effect: Allow
