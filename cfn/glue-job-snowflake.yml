@@ -92,15 +92,18 @@ Resources:
         Name: glueetl
         ScriptLocation: !Sub "s3://${SourceBucketName}/scripts/${ScriptName}"
         PythonVersion: "3"
-      GlueVersion: "4.0"
+      GlueVersion: "5.0"
       DefaultArguments:
         "--TempDir": !Sub "s3://${DataBucketName}/tmp/"
         "--job-language": "python"
         "--enable-continuous-cloudwatch-log": "true"
         "--enable-metrics": "true"
-        "--extra-py-files": !Ref LibraryPath
+        # "--extra-py-files": !Ref LibraryPath
+        "--python-modules-installer-option": "--requirement"
+        "--additional-python-modules": !Sub "s3://${SourceBucketName}/libs/requirements.txt"
         "--SF_SECRET_NAME": "snowflake"
         "--TARGET_S3_BUCKET": !Ref SourceBucketName
+
       # Connections:
       #   Connections:
       #     - redshift-demo-connection
