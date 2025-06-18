@@ -109,7 +109,7 @@ jobs:
       - name: Upload Glue Script
         # if: ${{ github.event.inputs.deployGlueJob == 'true' }}
         run: |
-          aws s3 cp scripts/sales_etl.py s3://${{ github.event.inputs.SourceBucketName }}/scripts/
+          aws s3 cp scripts/ s3://${{ github.event.inputs.SourceBucketName }}/scripts/ --recursive
 
       - name: Deploy Glue Job
         id: glue-job
@@ -144,6 +144,6 @@ jobs:
           parameter-overrides: >-
             SourceBucketName=${{ github.event.inputs.SourceBucketName }},
             DataBucketName=${{ github.event.inputs.DataBucketName }},
-            JobName=sales-aggregation-job,
+            JobName=snowflake_ingest,
             ScriptName=snowflake_ingest.py,
             LibraryPath=s3://${{ github.event.inputs.SourceBucketName }}/libs/glue_libs.zip
