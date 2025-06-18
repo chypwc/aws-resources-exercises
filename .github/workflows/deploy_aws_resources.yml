@@ -125,38 +125,39 @@ jobs:
             JobName=sales-aggregation-job,
             ScriptName=sales_etl.py
 
-      - name: Set up Python 3.7
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: 3.10
 
-      - name: Prepare and upload Python dependencies for Glue (Py3.7-compatible)
+      - name: Prepare and upload Python dependencies for Glue 4.0 (Python 3.10)
         run: |
           mkdir -p glue_libs temp
 
           # Upgrade pip
           python3 -m pip install --upgrade pip
 
-          # Download Glue-compatible wheels
+          # Download wheels compatible with Glue 4.0's runtime
           pip download \
             --only-binary=:all: \
-            --platform manylinux2010_x86_64 \
-            --python-version 3.7 \
+            --platform manylinux2014_x86_64 \
+            --python-version 3.10 \
             --implementation cp \
-            --abi cp37m \
+            --abi cp310 \
             --dest temp \
             snowflake-connector-python pandas pyarrow boto3
 
-          # Unzip all wheels to a flat directory
+          # Unpack all .whl files
           for whl in temp/*.whl; do
             unzip -q "$whl" -d glue_libs
           done
 
-          # Package and upload
+          # Zip the contents
           cd glue_libs
           zip -r ../glue_libs.zip ./*
           cd ..
 
+          # Upload to S3
           aws s3 cp glue_libs.zip s3://${{ github.event.inputs.SourceBucketName }}/libs/glue_libs.zip
         shell: bash
 

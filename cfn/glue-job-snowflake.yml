@@ -92,7 +92,7 @@ Resources:
         Name: glueetl
         ScriptLocation: !Sub "s3://${SourceBucketName}/scripts/${ScriptName}"
         PythonVersion: "3"
-      GlueVersion: "3.0"
+      GlueVersion: "4.0"
       DefaultArguments:
         "--TempDir": !Sub "s3://${DataBucketName}/tmp/"
         "--job-language": "python"
