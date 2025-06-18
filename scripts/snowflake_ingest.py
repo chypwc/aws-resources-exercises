@@ -36,7 +36,7 @@ conn = snowflake.connector.connect(
 )
 
 # --- Run Query ---
-tables = {"orders", "products", "departments", "aisles", "order_products"}
+tables = ["orders", "products", "departments", "aisles", "order_products"]
 for table_name in tables:
     query = f"SELECT * FROM {table_name} LIMIT 1000;"
     df = pd.read_sql(query, conn)

@@ -125,32 +125,24 @@ jobs:
             JobName=sales-aggregation-job,
             ScriptName=sales_etl.py
 
-      - name: upload snowflake connector package
-        id: snowflake-connector-upload
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Prepare and upload Python dependencies for Glue
         run: |
-          # 1. Create virtual environment with Python 3.9
-          python3.9 -m venv snowflake
-          source snowflake/bin/activate
-
-          # 2. Create directories for libraries
           mkdir -p glue_libs temp
-
-          # 3. Download all dependencies
           pip install --upgrade pip
           pip download snowflake-connector-python pandas pyarrow boto3 -d temp
-
-          # 4. Unpack all .whl files into a flat directory
           for whl in temp/*.whl; do
             unzip -q "$whl" -d glue_libs
           done
-
-          # 5. Zip the unpacked files (required for Glue --extra-py-files)
           cd glue_libs
           zip -r ../glue_libs.zip ./*
           cd ..
-
-          # 6. Upload to S3 (replace with your bucket if hardcoded or passed via env)
-          aws s3 cp glue_libs.zip s3://your-bucket-name/libs/glue_libs.zip
+          aws s3 cp glue_libs.zip s3://${{ github.event.inputs.SourceBucketName }}/libs/glue_libs.zip
+        shell: bash
 
       - name: loading from snowflake glue job
         id: glue-job-snowflake
