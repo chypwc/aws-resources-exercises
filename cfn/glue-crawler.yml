@@ -13,6 +13,7 @@ Resources:
       Targets:
         S3Targets:
           - Path: !Sub "s3://${SourceBucketName}/input/"
+          - Path: !Sub "s3://${SourceBucketName}/snowflake_exports/"
       TablePrefix: ""
       SchemaChangePolicy:
         UpdateBehavior: UPDATE_IN_DATABASE

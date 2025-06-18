@@ -36,35 +36,13 @@ jobs:
 
       - name: Run crawler script
         run: |
-          bash pipeline/crawler.sh
+          bash pipeline/run_crawler.sh
         env:
           SourceBucketName: ${{ github.event.inputs.SourceBucketName }}
           CrawlerName: source-csv-crawler
 
-      - name: Start Glue Job
-        if: ${{ github.event.inputs.deployGlueJob == 'true' }}
-        run: |
-          aws glue start-job-run --job-name sales-aggregation-job
+      # - name: Run Glue job and wait
+      #   run: ./scripts/glue_runner.sh sales-aggregation-job
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Install dbt and dbt-redshift
-        run: |
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install dbt-core dbt-redshift
-          echo "✅ dbt and dbt-redshift installed."
-
-      - name: Setup dbt profile using Secrets Manager
-        run: pipeline/dbt-profiles.sh
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ github.event.inputs.region }}
-
-      - name: Run dbt
-        run: |
-          cd dbt_project
-          dbt run --profiles-dir ~/.dbt
+      - name: Run Glue job and wait
+        run: ./scripts/glue_runner.sh snowflake-ingest

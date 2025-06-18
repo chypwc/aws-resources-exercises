@@ -170,4 +170,3 @@ jobs:
             DataBucketName=${{ github.event.inputs.DataBucketName }},
             JobName=snowflake_ingest,
             ScriptName=snowflake_ingest.py,
-            LibraryPath=s3://${{ github.event.inputs.SourceBucketName }}/libs/glue_wheels.zip

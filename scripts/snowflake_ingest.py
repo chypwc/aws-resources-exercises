@@ -1,45 +1,42 @@
-import pandas as pd
+import sys
+import boto3
 import pyarrow as pa
 import pyarrow.parquet as pq
-import snowflake.connector
-import boto3
-import os
-import json
+from awsglue.utils import getResolvedOptions
+from awsglue.context import GlueContext
+from pyspark.context import SparkContext
 
-# --- Load credentials from AWS Secrets Manager ---
-def load_snowflake_secrets(secret_name):
-    client = boto3.client('secretsmanager')
-    response = client.get_secret_value(SecretId=secret_name)
-    return json.loads(response['SecretString'])
+# --- Glue context ---
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
 
-# --- Retrieve secret and config values ---
-secret_name = os.environ["SF_SECRET_NAME"]
-config = load_snowflake_secrets(secret_name)
+# --- Job parameters ---
+args = getResolvedOptions(sys.argv, ["CONNECTION_NAME", "TARGET_S3_BUCKET"])
+connection_name = args["CONNECTION_NAME"]
+bucket = args["TARGET_S3_BUCKET"]
 
-sf_user = config["username"]
-sf_password = config["password"]
-sf_account = config["account"]
-sf_warehouse = config["warehouse"]
-sf_database = config["database"]
-sf_schema = config["schema"]
-sf_role = "ACCOUNTADMIN"
-
-# --- Connect to Snowflake ---
-conn = snowflake.connector.connect(
-    user=sf_user,
-    password=sf_password,
-    account=sf_account,
-    warehouse=sf_warehouse,
-    database=sf_database,
-    schema=sf_schema,
-    role=sf_role
-)
-
-# --- Run Query ---
+# --- Snowflake tables to export ---
 tables = ["orders", "products", "departments", "aisles", "order_products"]
+
 for table_name in tables:
-    query = f"SELECT * FROM {table_name} LIMIT 1000;"
-    df = pd.read_sql(query, conn)
+    print(f"📥 Reading Snowflake table: {table_name}")
+
+    # --- Read from Snowflake using Glue native connector ---
+    dyf = glueContext.create_dynamic_frame.from_options(
+        connection_type="snowflake",
+        connection_options={
+            "connectionName": connection_name,
+            "dbtable": table_name,
+            "sfDatabase": "IMBA",
+            "sfSchema": "PUBLIC",
+            "sfWarehouse": "COMPUTE_WH",
+            "sfRole": "ACCOUNTADMIN"
+        }
+    )
+
+    # --- Convert to Pandas DataFrame ---
+    df = dyf.toDF().limit(1000).toPandas()
 
     # --- Save as Parquet ---
     table = pa.Table.from_pandas(df)
@@ -47,11 +44,8 @@ for table_name in tables:
     pq.write_table(table, local_file)
 
     # --- Upload to S3 ---
-    s3 = boto3.client('s3')
-    bucket = os.environ["TARGET_S3_BUCKET"]
-    key = f"snowflake_exports/{table_name}.parquet"
-    s3.upload_file(local_file, bucket, key)
+    s3_key = f"snowflake_exports/{table_name}.parquet"
+    s3 = boto3.client("s3")
+    s3.upload_file(local_file, bucket, s3_key)
 
-    print(f"✅ Uploaded to s3://{bucket}/{key}")
-
-conn.close()
+    print(f"✅ Uploaded to s3://{bucket}/{s3_key}")

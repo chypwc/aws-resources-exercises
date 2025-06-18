@@ -11,10 +11,6 @@ Parameters:
   JobName:
     Description: Name the Glue Job
     Type: String
-  LibraryPath:
-    Description: Full S3 path to the ZIP of external Python libraries
-    Type: String
-    Default: ""
 
 Resources:
   GlueServiceRole:
@@ -38,7 +34,6 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              # S3 Access (read/write for both buckets)
               - Effect: Allow
                 Action:
                   - s3:GetObject
@@ -50,8 +45,6 @@ Resources:
                   - !Sub "arn:aws:s3:::${SourceBucketName}/*"
                   - !Sub "arn:aws:s3:::${DataBucketName}"
                   - !Sub "arn:aws:s3:::${DataBucketName}/*"
-
-              # CloudWatch Logs access
               - Effect: Allow
                 Action:
                   - logs:CreateLogGroup
@@ -60,28 +53,40 @@ Resources:
                   - logs:DescribeLogStreams
                   - logs:DescribeLogGroups
                 Resource: "*"
-
-              # Secrets Manager access for Redshift credentials resolution
               - Effect: Allow
                 Action:
                   - secretsmanager:GetSecretValue
                   - secretsmanager:DescribeSecret
                 Resource: "*"
-
-              # Allow Glue to use connections (e.g., Redshift)
               - Effect: Allow
                 Action:
                   - glue:GetConnection
                   - glue:GetConnections
                 Resource: "*"
-
-              # to allow CodeWhisperer actions
               - Effect: Allow
                 Action:
                   - codewhisperer:GenerateRecommendations
                   - codewhisperer:ListRecommendations
                   - codewhisperer:GetRecommendation
                 Resource: "*"
+
+  SnowflakeGlueConnection:
+    Type: AWS::Glue::Connection
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      ConnectionInput:
+        Name: snowflake-connection
+        ConnectionType: SNOWFLAKE
+        Description: Glue connection to Snowflake using Secrets Manager
+        ConnectionProperties:
+          CONNECTION_NAME: snowflake-connection
+          SECRET_ID: snowflake
+          JDBC_CONNECTION_URL: "jdbc:snowflake://DHAHNFX-AM43103.snowflakecomputing.com:443"
+        # Optional: Uncomment the following if using VPC interface endpoints
+        # PhysicalConnectionRequirements:
+        #   SubnetId: !Ref GlueSubnetId
+        #   SecurityGroupIdList:
+        #     - !Ref GlueSecurityGroup
 
   GlueJob:
     Type: AWS::Glue::Job
@@ -98,15 +103,11 @@ Resources:
         "--job-language": "python"
         "--enable-continuous-cloudwatch-log": "true"
         "--enable-metrics": "true"
-        # "--extra-py-files": !Ref LibraryPath
-        "--python-modules-installer-option": "--requirement"
-        "--additional-python-modules": !Sub "s3://${SourceBucketName}/libs/requirements.txt"
         "--SF_SECRET_NAME": "snowflake"
         "--TARGET_S3_BUCKET": !Ref SourceBucketName
-
-      # Connections:
-      #   Connections:
-      #     - redshift-demo-connection
+      Connections:
+        Connections:
+          - snowflake-connection
       ExecutionProperty:
         MaxConcurrentRuns: 1
       MaxRetries: 0
