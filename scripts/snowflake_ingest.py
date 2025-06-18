@@ -17,7 +17,7 @@ connection_name = args["CONNECTION_NAME"]
 bucket = args["TARGET_S3_BUCKET"]
 
 # --- Snowflake tables to export ---
-tables = ["orders", "products", "departments", "aisles", "order_products"]
+tables = ["orders", "products", "departments", "aisles", "order_products__prior", "order_products__train"]
 
 for table_name in tables:
     print(f"📥 Reading Snowflake table: {table_name}")

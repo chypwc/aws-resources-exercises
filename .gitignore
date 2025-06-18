@@ -1,1 +1,52 @@
 *.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+
+# Virtual environments
+.env
+.venv/
+env/
+venv/
+
+# dbt artifacts
+dbt_glue/dbt_packages/
+dbt_glue/target/
+dbt_glue/dbt_modules/
+dbt_glue/manifest.json
+dbt_glue/run_results.json
+dbt_glue/profiles.yml
+
+# Airflow
+airflow/airflow.db
+airflow/unittests.cfg
+logs/
+*.pid
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+.env
+.env.*
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Local configuration
+*.local
+*.bak
+
+# Ignore temporary files
+*.swp
+*.swo
+*~

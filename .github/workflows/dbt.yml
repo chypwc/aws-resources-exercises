@@ -1,0 +1,46 @@
+name: Deploy and Run dbt-glue
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-dbt-glue:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: Install AWS CLI and dbt-glue
+        run: |
+          pip install awscli dbt-glue
+
+      - name: Create dbt profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOF
+          my_glue_project:
+          target: dev
+          outputs:
+              dev:
+              type: glue
+              role_arn: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.GLUE_ROLE_NAME }}
+              region: ap-southeast-2
+              workers: 5
+              worker_type: G.1X
+              schema: my_schema
+              database: my_database
+              glue_version: 3.0
+              iam_role: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.GLUE_ROLE_NAME }}
+          EOF
+
+      - name: Run dbt on Glue Interactive Sessions
+        env:
+          AWS_REGION: ap-southeast-2
+        run: |
+          dbt run --profiles-dir ~/.dbt/ dbt_glue --project-dir dbt_glue/
