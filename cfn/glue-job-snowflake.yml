@@ -99,9 +99,9 @@ Resources:
         "--extra-py-files": !Ref LibraryPath
         "--SF_SECRET_NAME": "my-snowflake-secret-name"
         "--TARGET_S3_BUCKET": !Ref SourceBucketName
-      Connections:
-        Connections:
-          - redshift-demo-connection
+      # Connections:
+      #   Connections:
+      #     - redshift-demo-connection
       ExecutionProperty:
         MaxConcurrentRuns: 1
       MaxRetries: 0
