@@ -132,21 +132,25 @@ jobs:
 
       - name: Prepare and upload Python wheels for Glue 4.0 (Py3.10)
         run: |
-          mkdir -p glue_wheels
-          pip install --upgrade pip
+          mkdir -p glue_wheels temp
+          python3 -m pip install --upgrade pip
 
-          # Download .whl files only (no source trees)
           pip download \
             --only-binary=:all: \
             --platform manylinux2014_x86_64 \
             --python-version 3.10 \
             --implementation cp \
             --abi cp310 \
-            --dest glue_wheels \
+            --dest temp \
             snowflake-connector-python pandas pyarrow boto3
 
-          # Upload individual wheel files to S3
-          aws s3 sync glue_wheels/ s3://${{ github.event.inputs.SourceBucketName }}/glue_wheels/
+          # Zip all .whl files
+          cd temp
+          zip ../glue_wheels.zip ./*.whl
+          cd ..
+
+          # Upload to S3
+          aws s3 cp glue_wheels.zip s3://${{ github.event.inputs.SourceBucketName }}/libs/glue_wheels.zip
 
       - name: loading from snowflake glue job
         id: glue-job-snowflake
@@ -160,4 +164,4 @@ jobs:
             DataBucketName=${{ github.event.inputs.DataBucketName }},
             JobName=snowflake_ingest,
             ScriptName=snowflake_ingest.py,
-            LibraryPath=s3://${{ github.event.inputs.SourceBucketName }}/glue_wheels/*.whl
+            LibraryPath=s3://${{ github.event.inputs.SourceBucketName }}/libs/glue_wheels.zip
