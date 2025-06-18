@@ -12,7 +12,7 @@ Resources:
       DatabaseName: sales_db
       Targets:
         S3Targets:
-          - Path: !Sub "s3://${SourceBucketName}/input/"
+          # - Path: !Sub "s3://${SourceBucketName}/input/"
           - Path: !Sub "s3://${SourceBucketName}/snowflake_exports/"
       TablePrefix: ""
       SchemaChangePolicy:
