@@ -131,7 +131,7 @@ jobs:
           mkdir glue_libs
           cd glue_libs
           pip download snowflake-connector-python pandas pyarrow boto3 -d .
-          zip -r glue_libs.zip .
+          zip -r ../glue_libs.zip ./*
           aws s3 cp glue_libs.zip s3://${{ github.event.inputs.SourceBucketName }}/libs/glue_libs.zip
 
       - name: loading from snowflake glue job
