@@ -82,6 +82,7 @@ Resources:
   # Store Redshift master user credentials securely in AWS Secrets Manager
   RedshiftCreds:
     Type: "AWS::SecretsManager::Secret"
+    Name: redshift-master-user-secret
     Properties:
       Description: !Sub "Redshift cluster master user credentials for ${AWS::StackName}"
       GenerateSecretString:

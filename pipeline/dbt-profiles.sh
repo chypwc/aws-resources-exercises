@@ -3,7 +3,7 @@ set -e
 
 echo "🔐 Fetching Redshift credentials from Secrets Manager..."
 SECRET=$(aws secretsmanager get-secret-value \
-  --secret-id RedshiftCreds \
+  --secret-id redshift-master-user-secret \
   --query SecretString \
   --output text)
 

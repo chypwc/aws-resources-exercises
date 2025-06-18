@@ -97,6 +97,8 @@ Resources:
         "--enable-continuous-cloudwatch-log": "true"
         "--enable-metrics": "true"
         "--extra-py-files": !Ref LibraryPath
+        "--SF_SECRET_NAME": "my-snowflake-secret-name"
+        "--TARGET_S3_BUCKET": !Ref SourceBucketName
       Connections:
         Connections:
           - redshift-demo-connection
