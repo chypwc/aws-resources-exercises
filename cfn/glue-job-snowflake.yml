@@ -93,11 +93,16 @@ Resources:
     Properties:
       Name: !Sub "${JobName}"
       Role: !GetAtt GlueServiceRole.Arn
+      GlueVersion: "4.0"
+      JobType: Spark
+      SparkProperties:
+        MaxConcurrentRuns: 1
+        NumberOfWorkers: 5
+        WorkerType: G.1X
       Command:
         Name: glueetl
         ScriptLocation: !Sub "s3://${SourceBucketName}/scripts/${ScriptName}"
         PythonVersion: "3"
-      GlueVersion: "5.0"
       DefaultArguments:
         "--TempDir": !Sub "s3://${DataBucketName}/tmp/"
         "--job-language": "python"
@@ -108,10 +113,6 @@ Resources:
       Connections:
         Connections:
           - snowflake-connection
-      ExecutionProperty:
-        MaxConcurrentRuns: 1
       MaxRetries: 0
-      WorkerType: G.1X
-      NumberOfWorkers: 5
       Tags:
         Environment: dev
