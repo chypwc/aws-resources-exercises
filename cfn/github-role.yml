@@ -2,6 +2,9 @@ Parameters:
   AccountId:
     Description: Account ID
     Type: String
+  GitHubRepo:
+    Description: GitHub repo in the format org/repo
+    Type: String
 
 GitHubActionsRole:
   Type: AWS::IAM::Role
@@ -16,7 +19,7 @@ GitHubActionsRole:
           Action: sts:AssumeRoleWithWebIdentity
           Condition:
             StringLike:
-              token.actions.githubusercontent.com:sub: repo:<GitHubOrg>/<RepoName>:*
+              token.actions.githubusercontent.com:sub: !Sub repo:${GitHubRepo}:*
     Policies:
       - PolicyName: GitHubActionsGlueAccess
         PolicyDocument:
@@ -31,4 +34,4 @@ GitHubActionsRole:
             - Effect: Allow
               Action:
                 - iam:PassRole
-              Resource: arn:aws:iam::<ACCOUNT_ID>:role/DbtGlueExecutionRole
+              Resource: !Sub arn:aws:iam::${AccountId}:role/DbtGlueExecutionRole

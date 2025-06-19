@@ -33,7 +33,15 @@ jobs:
         id: get-account
         run: echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> "$GITHUB_ENV"
 
-      - name: Deploy Github action role
+      - name: Deploy github action role
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        with:
+          name: github-action-role
+          template: cfn/github-role.yml
+          capabilities: CAPABILITY_NAMED_IAM
+          parameter-overrides: >-
+            AccountId: ${{ env.ACCOUNT_ID }},
+            GitHubRepo: ${{ github.repository }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
