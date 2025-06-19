@@ -62,7 +62,5 @@ jobs:
           DATA_BUCKET: ${{ github.event.inputs.DataBucketName }}
 
       - name: Run dbt on Glue Interactive Sessions
-        env:
-          AWS_REGION: ap-southeast-2
         run: |
-          dbt run --profiles-dir ~/.dbt/ dbt_glue --project-dir dbt_glue/
+          dbt run --profiles-dir ~/.dbt/ --project-dir dbt_glue/
