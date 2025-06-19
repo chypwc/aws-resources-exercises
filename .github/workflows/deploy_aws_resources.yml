@@ -157,7 +157,7 @@ jobs:
             CrawlerName=snowflake_input_crawler,
             Database=imba
 
-      - name: dbt role
+      - name: Deploy dbt role for glue
         id: dbt-glue-role
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
         with:

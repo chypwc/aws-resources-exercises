@@ -31,13 +31,14 @@ dbt_glue:  # <-- must match 'name' in dbt_project.yml
       schema: sales_db
       session_provisioning_timeout_in_seconds: 120
       location: "s3://$TARGET_BUCKET/imba"
-      glue_version: "4.0"
+      glue_version: "3.0"
       glue_session_reuse: true
       idle_timeout: 10
       query_timeout_in_minutes: 300
       seed_format: parquet
       seed_mode: overwrite
-      default_arguments: "--enable-continuous-cloudwatch-log=true, --enable-spark-ui=true, --enable-metrics=true, --spark-event-logs-path=s3://$TARGET_BUCKET/sparkui/"
+      default_arguments: "--enable-continuous-cloudwatch-log=true, --enable-spark-ui=true, --enable-metrics=true, --spark-event-logs-path=s3://source-bucket-chien/sparkui/, --conf spark.sql.legacy.allowNonEmptyLocationInCTAS=true"
+      conf: "--conf spark.sql.legacy.allowNonEmptyLocationInCTAS=true"
       project_name: dbtGlueProject
 EOF
 

@@ -3,6 +3,16 @@
     schema='sales_silver', 
     custom_location='s3://source-bucket-chien/output/silver/dim_customer') }}
 
+{#
+{{ config(
+    materialized='incremental',
+    incremental_strategy='insert_overwrite',
+    schema='sales_silver',
+    custom_location='s3://source-bucket-chien/output/silver/dim_customer'
+) }}
+#}
+
+
 select c_custkey as customer_key,
        c_name as customer,
        c_nationkey as country_key,
