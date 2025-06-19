@@ -101,14 +101,14 @@ Resources:
           USERNAME: "{{resolve:secretsmanager:snowflake:SecretString:USERNAME}}"
           PASSWORD: "{{resolve:secretsmanager:snowflake:SecretString:PASSWORD}}"
 
-      PhysicalConnectionRequirements:
-        SecurityGroupIdList:
-          - !Ref GlueSecurityGroup
-        SubnetId: !ImportValue vpc-stack-PrivateSubnet1
-      AvailabilityZone: !Select
-        - 0
-        - !GetAZs
-          Ref: "AWS::Region"
+        PhysicalConnectionRequirements:
+          SecurityGroupIdList:
+            - !Ref GlueSecurityGroup
+          SubnetId: !ImportValue vpc-stack-PrivateSubnet1
+          AvailabilityZone: !Select
+            - 0
+            - !GetAZs
+              Ref: "AWS::Region"
 
   GlueJob:
     Type: AWS::Glue::Job
