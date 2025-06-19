@@ -1,5 +1,3 @@
-name: Deploy and Run dbt-glue
-
 on:
   workflow_dispatch:
 

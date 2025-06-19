@@ -2,8 +2,8 @@ version: 2
 
 sources:
   - name: silver_source # This is the source name (used in `source('public', ...)`)
-    database: jr_lab_db5
-    schema: silver # This is the actual Snowflake schema name
+    # database: silver
+    schema: sales_silver # This is the actual Snowflake schema name
     tables:
       - name: dim_country
       - name: dim_region

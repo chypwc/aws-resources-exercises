@@ -1,3 +1,11 @@
+Parameters:
+  SourceBucketName:
+    Description: Name the source Bucket
+    Type: String
+  DataBucketName:
+    Description: Name the data Bucket
+    Type: String
+
 Resources:
   DbtGlueExecutionRole:
     Type: AWS::IAM::Role
@@ -10,6 +18,8 @@ Resources:
             Principal:
               Service: glue.amazonaws.com
             Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
       Policies:
         - PolicyName: DbtGlueCustomPolicy
           PolicyDocument:
@@ -17,80 +27,13 @@ Resources:
             Statement:
               - Sid: ReadAndWriteDatabases
                 Effect: Allow
-                Action:
-                  - glue:SearchTables
-                  - glue:BatchCreatePartition
-                  - glue:CreatePartitionIndex
-                  - glue:DeleteDatabase
-                  - glue:GetTableVersions
-                  - glue:GetPartitions
-                  - glue:DeleteTableVersion
-                  - glue:UpdateTable
-                  - glue:DeleteTable
-                  - glue:DeletePartitionIndex
-                  - glue:GetTableVersion
-                  - glue:UpdateColumnStatisticsForTable
-                  - glue:CreatePartition
-                  - glue:UpdateDatabase
-                  - glue:CreateTable
-                  - glue:GetTables
-                  - glue:GetDatabases
-                  - glue:GetTable
-                  - glue:GetDatabase
-                  - glue:GetPartition
-                  - glue:UpdateColumnStatisticsForPartition
-                  - glue:CreateDatabase
-                  - glue:BatchDeleteTableVersion
-                  - glue:BatchDeleteTable
-                  - glue:DeletePartition
-                  - glue:GetUserDefinedFunctions
-                  - lakeformation:ListResources
-                  - lakeformation:BatchGrantPermissions
-                  - lakeformation:ListPermissions
-                  - lakeformation:GetDataAccess
-                  - lakeformation:GrantPermissions
-                  - lakeformation:RevokePermissions
-                  - lakeformation:BatchRevokePermissions
-                  - lakeformation:AddLFTagsToResource
-                  - lakeformation:RemoveLFTagsFromResource
-                  - lakeformation:GetResourceLFTags
-                  - lakeformation:ListLFTags
-                  - lakeformation:GetLFTag
+                Action: ...
                 Resource:
                   - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog
-                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/sales_db/*
-                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/sales_db
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/*
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/*
 
-              - Sid: ReadOnlyDatabases
-                Effect: Allow
-                Action:
-                  - glue:SearchTables
-                  - glue:GetTableVersions
-                  - glue:GetPartitions
-                  - glue:GetTableVersion
-                  - glue:GetTables
-                  - glue:GetDatabases
-                  - glue:GetTable
-                  - glue:GetDatabase
-                  - glue:GetPartition
-                  - lakeformation:ListResources
-                  - lakeformation:ListPermissions
-                Resource:
-                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/bronze/*
-                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/bronze
-                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/default
-                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/global_temp
-
-              - Sid: StorageAllBuckets
-                Effect: Allow
-                Action:
-                  - s3:GetBucketLocation
-                  - s3:ListBucket
-                Resource:
-                  - arn:aws:s3:::my-output-bucket
-                  - arn:aws:s3:::my-source-bucket
-
-              - Sid: ReadAndWritebuckets
+              - Sid: ReadAndWriteBuckets
                 Effect: Allow
                 Action:
                   - s3:PutObject
@@ -98,11 +41,13 @@ Resources:
                   - s3:GetObject
                   - s3:DeleteObject
                 Resource:
-                  - arn:aws:s3:::my-output-bucket/*
+                  - !Sub arn:aws:s3:::${SourceBucketName}
+                  - !Sub arn:aws:s3:::${SourceBucketName}/*
+                  - !Sub arn:aws:s3:::${DataBucketName}
+                  - !Sub arn:aws:s3:::${DataBucketName}/*
 
-              - Sid: ReadOnlyBuckets
+              - Sid: AllowPassRoleForGlue
                 Effect: Allow
                 Action:
-                  - s3:GetObject
-                Resource:
-                  - arn:aws:s3:::my-source-bucket/*
+                  - iam:PassRole
+                Resource: !GetAtt DbtGlueExecutionRole.Arn

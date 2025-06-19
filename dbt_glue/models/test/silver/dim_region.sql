@@ -1,5 +1,11 @@
-{{ config(materialized='table', schema='silver') }}
+{{ config(
+    materialized='incremental',
+    incremental_strategy='insert_overwrite',
+    file_format='parquet',
+    unique_key='region_key',
+    schema='sales_silver', 
+    custom_location='s3://source-bucket-chien/output/silver/dim_region') }}
 
 select r_regionkey as region_key,
        r_name as region
-from {{ source('bronze_source', 'regions_raw') }}
+from {{ source('bronze_source', 'regions_raw_csv') }}

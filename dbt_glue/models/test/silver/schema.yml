@@ -15,7 +15,7 @@ sources:
     # database:
     schema: sales_db # This is the actual Snowflake schema name
     tables:
-      - name: nations_raw
-      - name: regions_raw
-      - name: orders_raw
-      - name: customers_raw
+      - name: nations_raw_csv
+      - name: regions_raw_csv
+      - name: orders_raw_csv
+      - name: customers_raw_csv
