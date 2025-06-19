@@ -115,5 +115,4 @@ Resources:
         Connections:
           - snowflake-connection
       Tags:
-        - Key: Environment
-          Value: dev
+        Environment: dev
