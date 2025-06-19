@@ -133,7 +133,7 @@ Resources:
       GlueVersion: "4.0"
       WorkerType: G.1X
       NumberOfWorkers: 5
-      Timeout: 3
+      Timeout: 60 # minutes
       ExecutionClass: FLEX
       ExecutionProperty:
         MaxConcurrentRuns: 1

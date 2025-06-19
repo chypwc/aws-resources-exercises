@@ -1,4 +1,5 @@
 import sys
+import json
 import boto3
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -12,9 +13,22 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 
 # --- Job parameters ---
-args = getResolvedOptions(sys.argv, ["CONNECTION_NAME", "TARGET_S3_BUCKET"])
+args = getResolvedOptions(sys.argv, ["CONNECTION_NAME", "TARGET_S3_BUCKET", "SF_SECRET_NAME"])
 connection_name = args["CONNECTION_NAME"]
 bucket = args["TARGET_S3_BUCKET"]
+secret_name = args["SF_SECRET_NAME"]
+
+# --- Fetch Snowflake credentials from Secrets Manager ---
+secrets_client = boto3.client("secretsmanager")
+secret_response = secrets_client.get_secret_value(SecretId=secret_name)
+secret_dict = json.loads(secret_response["SecretString"])
+
+sf_user = secret_dict["USERNAME"]
+sf_password = secret_dict["PASSWORD"]
+sf_account = secret_dict["ACCOUNT"]
+sf_warehouse = secret_dict.get("sfWarehouse", "COMPUTE_WH")
+sf_database = secret_dict.get("sfDatabase", "IMBA")
+sf_schema = secret_dict.get("sfSchema", "PUBLIC")
 
 # --- Snowflake tables to export ---
 tables = ["orders", "products", "departments", "aisles", "order_products__prior", "order_products__train"]
@@ -28,11 +42,12 @@ for table_name in tables:
             connection_type="snowflake",
             connection_options={
                 "connectionName": connection_name,
-                "dbtable": table_name,
-                # "sfDatabase": "IMBA",
-                # "sfSchema": "PUBLIC",
-                # "sfWarehouse": "COMPUTE_WH",
-                # "sfRole": "ACCOUNTADMIN"
+                "sfUser": sf_user,
+                "sfPassword": sf_password,
+                "sfDatabase": sf_database,
+                "sfSchema": sf_schema,
+                "sfWarehouse": sf_warehouse,
+                "dbtable": table_name
             }
         )
         row_count = dyf.count()
@@ -40,7 +55,7 @@ for table_name in tables:
 
         # --- Write DynamicFrame directly as Parquet to S3 ---
         output_path = f"s3://{bucket}/snowflake_exports/{table_name}"
-        dyf.toDF().write.mode("overwrite").parquet(output_path)
+        dyf.toDF().repartition(10).write.mode("overwrite").parquet(output_path)
     
         print(f"✅ Exported {table_name} to {output_path}")
     
