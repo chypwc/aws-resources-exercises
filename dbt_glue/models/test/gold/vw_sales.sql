@@ -1,8 +1,5 @@
 {{ config(
-    mmaterialized='incremental',
-    incremental_strategy='insert_overwrite',
-    file_format='parquet',
-    unique_key=['region', 'country', 'order_date'],
+    mmaterialized='table',
     schema='sales_gold', 
     custom_location='s3://source-bucket-chien/output/silver/vw_sales') }}
 

@@ -1,8 +1,5 @@
 {{ config(
-    materialized='incremental',
-    incremental_strategy='insert_overwrite',
-    file_format='parquet',
-    unique_key='customer_key',
+    materialized='table',
     schema='sales_silver', 
     custom_location='s3://source-bucket-chien/output/silver/dim_customer') }}
 

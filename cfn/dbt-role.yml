@@ -83,3 +83,12 @@ Resources:
                   - !Sub arn:aws:s3:::${SourceBucketName}/*
                   - !Sub arn:aws:s3:::${DataBucketName}
                   - !Sub arn:aws:s3:::${DataBucketName}/*
+
+              - Sid: CloudWatchLogsAccess
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogStreams
+                Resource: "*"
