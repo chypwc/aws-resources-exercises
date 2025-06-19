@@ -74,7 +74,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Security group for AWS Glue to access Snowflake over JDBC
-      VpcId: !ImportValue vpc-stack-VPCID # Ensure this value is exported from your VPC stack
+      VpcId: !ImportValue vpc-stack-VPCId # Ensure this value is exported from your VPC stack
       SecurityGroupEgress:
         - IpProtocol: "-1"
           CidrIp: "0.0.0.0/0"
