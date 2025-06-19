@@ -96,7 +96,7 @@ jobs:
           capabilities: CAPABILITY_NAMED_IAM
 
       - name: Upload Glue Script
-        # if: ${{ github.event.inputs.deployGlueJob == 'true' }}
+        if: ${{ github.event.inputs.deployGlueJob == 'true' }}
         run: |
           aws s3 cp scripts/ s3://${{ github.event.inputs.SourceBucketName }}/scripts/ --recursive
 
@@ -115,7 +115,7 @@ jobs:
       #       ScriptName=sales_etl.py
 
       - name: loading from snowflake glue job
-        # if: ${{ github.event.inputs.deployGlueJob == 'true' }}
+        if: ${{ github.event.inputs.deployGlueJob == 'true' }}
         id: glue-job-snowflake
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
         with:

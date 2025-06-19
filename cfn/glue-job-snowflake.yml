@@ -143,6 +143,7 @@ Resources:
         "--conf": "spark.sql.sources.partitionOverwriteMode=dynamic"
         "--SF_SECRET_NAME": "snowflake"
         "--TARGET_S3_BUCKET": !Ref SourceBucketName
+        "--CONNECTION_NAME": "snowflake-connection"
       Connections:
         Connections:
           - snowflake-connection
