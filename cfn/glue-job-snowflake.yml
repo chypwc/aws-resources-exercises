@@ -150,6 +150,7 @@ Resources:
         "--SF_SECRET_NAME": "snowflake"
         "--TARGET_S3_BUCKET": !Ref SourceBucketName
         "--CONNECTION_NAME": "snowflake-connection"
+        "--enable-network-isolation": "true"
       Connections:
         Connections:
           - snowflake-connection
