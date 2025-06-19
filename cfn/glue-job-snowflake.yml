@@ -100,7 +100,7 @@ Resources:
       CatalogId: !Ref AWS::AccountId
       ConnectionInput:
         Name: snowflake-connection
-        ConnectionType: Snowflake
+        ConnectionType: SNOWFLAKE
         Description: Native Glue connection to Snowflake using Secrets Manager
         ConnectionProperties:
           SECRET_ID: snowflake # Name of the secret in Secrets Manager
