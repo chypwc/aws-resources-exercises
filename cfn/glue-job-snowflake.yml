@@ -136,6 +136,7 @@ Resources:
         "--SF_SECRET_NAME": "snowflake"
         "--TARGET_S3_BUCKET": !Ref SourceBucketName
       Connections:
-        - snowflake-connection
+        Connections:
+          - snowflake-connection
       Tags:
         Environment: dev
