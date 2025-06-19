@@ -1,6 +1,3 @@
-AWSTemplateFormatVersion: "2010-09-09"
-Description: IAM Role for dbt to use AWS Glue
-
 Resources:
   DbtGlueExecutionRole:
     Type: AWS::IAM::Role
@@ -13,48 +10,99 @@ Resources:
             Principal:
               Service: glue.amazonaws.com
             Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
       Policies:
         - PolicyName: DbtGlueCustomPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              # Allow writing to S3 for outputs and logs
-              - Effect: Allow
+              - Sid: Read_and_write_databases
+                Effect: Allow
+                Action:
+                  - glue:SearchTables
+                  - glue:BatchCreatePartition
+                  - glue:CreatePartitionIndex
+                  - glue:DeleteDatabase
+                  - glue:GetTableVersions
+                  - glue:GetPartitions
+                  - glue:DeleteTableVersion
+                  - glue:UpdateTable
+                  - glue:DeleteTable
+                  - glue:DeletePartitionIndex
+                  - glue:GetTableVersion
+                  - glue:UpdateColumnStatisticsForTable
+                  - glue:CreatePartition
+                  - glue:UpdateDatabase
+                  - glue:CreateTable
+                  - glue:GetTables
+                  - glue:GetDatabases
+                  - glue:GetTable
+                  - glue:GetDatabase
+                  - glue:GetPartition
+                  - glue:UpdateColumnStatisticsForPartition
+                  - glue:CreateDatabase
+                  - glue:BatchDeleteTableVersion
+                  - glue:BatchDeleteTable
+                  - glue:DeletePartition
+                  - glue:GetUserDefinedFunctions
+                  - lakeformation:ListResources
+                  - lakeformation:BatchGrantPermissions
+                  - lakeformation:ListPermissions
+                  - lakeformation:GetDataAccess
+                  - lakeformation:GrantPermissions
+                  - lakeformation:RevokePermissions
+                  - lakeformation:BatchRevokePermissions
+                  - lakeformation:AddLFTagsToResource
+                  - lakeformation:RemoveLFTagsFromResource
+                  - lakeformation:GetResourceLFTags
+                  - lakeformation:ListLFTags
+                  - lakeformation:GetLFTag
+                Resource:
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/sales_db/*
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/sales_db
+
+              - Sid: Read_only_databases
+                Effect: Allow
+                Action:
+                  - glue:SearchTables
+                  - glue:GetTableVersions
+                  - glue:GetPartitions
+                  - glue:GetTableVersion
+                  - glue:GetTables
+                  - glue:GetDatabases
+                  - glue:GetTable
+                  - glue:GetDatabase
+                  - glue:GetPartition
+                  - lakeformation:ListResources
+                  - lakeformation:ListPermissions
+                Resource:
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/bronze/*
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/bronze
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/default
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/global_temp
+
+              - Sid: Storage_all_buckets
+                Effect: Allow
+                Action:
+                  - s3:GetBucketLocation
+                  - s3:ListBucket
+                Resource:
+                  - arn:aws:s3:::my-output-bucket
+                  - arn:aws:s3:::my-source-bucket
+
+              - Sid: Read_and_write_buckets
+                Effect: Allow
                 Action:
                   - s3:PutObject
+                  - s3:PutObjectAcl
                   - s3:GetObject
-                  - s3:ListBucket
                   - s3:DeleteObject
-                Resource: "*"
+                Resource:
+                  - arn:aws:s3:::my-output-bucket/*
 
-              # Allow Secrets Manager for credentials (optional)
-              - Effect: Allow
+              - Sid: Read_only_buckets
+                Effect: Allow
                 Action:
-                  - secretsmanager:GetSecretValue
-                Resource: "*"
-
-              # Optional: Allow Athena or other services if used
-              - Effect: Allow
-                Action:
-                  - athena:StartQueryExecution
-                  - athena:GetQueryExecution
-                  - athena:GetQueryResults
-                Resource: "*"
-
-  DbtPassRolePolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: AllowPassDbtGlueRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action: iam:PassRole
-            Resource: !GetAtt DbtGlueExecutionRole.Arn
-            Condition:
-              StringEquals:
-                iam:PassedToService: glue.amazonaws.com
-      Roles:
-        - !Ref DbtGlueExecutionRole
+                  - s3:GetObject
+                Resource:
+                  - arn:aws:s3:::my-source-bucket/*
