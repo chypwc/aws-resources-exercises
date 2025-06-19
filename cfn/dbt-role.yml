@@ -1,3 +1,11 @@
+Parameters:
+  SourceBucketName:
+    Description: Name the source Bucket
+    Type: String
+  DataBucketName:
+    Description: Name the data Bucket
+    Type: String
+
 Resources:
   DbtGlueExecutionRole:
     Type: AWS::IAM::Role
