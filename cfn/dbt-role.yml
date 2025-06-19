@@ -45,9 +45,3 @@ Resources:
                   - !Sub arn:aws:s3:::${SourceBucketName}/*
                   - !Sub arn:aws:s3:::${DataBucketName}
                   - !Sub arn:aws:s3:::${DataBucketName}/*
-
-              - Sid: AllowPassRoleForGlue
-                Effect: Allow
-                Action:
-                  - iam:PassRole
-                Resource: !GetAtt DbtGlueExecutionRole.Arn
