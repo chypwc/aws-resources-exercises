@@ -114,7 +114,7 @@ jobs:
       #       JobName=sales-aggregation-job,
       #       ScriptName=sales_etl.py
 
-      - name: loading from snowflake glue job
+      - name: Deploy snowflake glue job
         if: ${{ github.event.inputs.deployGlueJob == 'true' }}
         id: glue-job-snowflake
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
@@ -126,7 +126,7 @@ jobs:
             SourceBucketName=${{ github.event.inputs.SourceBucketName }},
             DataBucketName=${{ github.event.inputs.DataBucketName }},
             JobName=snowflake-ingest,
-            ScriptName=snowflake_ingest.py
+            ScriptName=snowflake_ingest.py,
             SnowflakeAccount=${{ secrets.SNOWFLAKE_ACCOUNT }}
 
       - name: Deploy Glue Crawler
