@@ -94,7 +94,7 @@ Resources:
       IpProtocol: "-1"
       SourceSecurityGroupId: !Ref GlueSecurityGroup
 
-  SnowflakeGlueConnection:
+  SnowflakeGlueConnectionV2:
     Type: AWS::Glue::Connection
     Properties:
       CatalogId: !Ref AWS::AccountId
