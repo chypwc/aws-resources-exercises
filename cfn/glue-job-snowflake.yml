@@ -89,31 +89,31 @@ Resources:
         #     - !Ref GlueSecurityGroup
 
   GlueJob:
-  Type: AWS::Glue::Job
-  Properties:
-    Name: !Ref JobName
-    Role: !GetAtt GlueServiceRole.Arn
-    Description: "Glue Spark job to ingest data from Snowflake"
-    GlueVersion: "4.0"
-    WorkerType: G.1X
-    NumberOfWorkers: 5
-    Timeout: 1 # in minutes
-    ExecutionProperty:
-      MaxConcurrentRuns: 1
-    Command:
-      Name: glueetl
-      ScriptLocation: !Sub "s3://${SourceBucketName}/scripts/${ScriptName}"
-      PythonVersion: "3"
-    DefaultArguments:
-      "--TempDir": !Sub "s3://${DataBucketName}/tmp/"
-      "--job-language": "python"
-      "--enable-continuous-cloudwatch-log": "true"
-      "--enable-metrics": "true"
-      "--SF_SECRET_NAME": "snowflake" # Optional: if your script loads secrets
-      "--TARGET_S3_BUCKET": !Ref SourceBucketName
-    Connections:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Ref JobName
+      Role: !GetAtt GlueServiceRole.Arn
+      Description: "Glue Spark job to ingest data from Snowflake"
+      GlueVersion: "4.0"
+      WorkerType: G.1X
+      NumberOfWorkers: 5
+      Timeout: 1 # in minutes
+      ExecutionProperty:
+        MaxConcurrentRuns: 1
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub "s3://${SourceBucketName}/scripts/${ScriptName}"
+        PythonVersion: "3"
+      DefaultArguments:
+        "--TempDir": !Sub "s3://${DataBucketName}/tmp/"
+        "--job-language": "python"
+        "--enable-continuous-cloudwatch-log": "true"
+        "--enable-metrics": "true"
+        "--SF_SECRET_NAME": "snowflake" # Optional: if your script loads secrets
+        "--TARGET_S3_BUCKET": !Ref SourceBucketName
       Connections:
-        - snowflake-connection
-    Tags:
-      - Key: Environment
-        Value: dev
+        Connections:
+          - snowflake-connection
+      Tags:
+        - Key: Environment
+          Value: dev
