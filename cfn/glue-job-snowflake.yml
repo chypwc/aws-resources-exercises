@@ -109,7 +109,7 @@ Resources:
           SparkProperties: !Sub >
             {
               "sfUrl": "https://${SnowflakeAccount}.snowflakecomputing.com",
-              "secretId": "snowflake-connection-secretid"
+              "secretId": "snowflake"
             }
           PythonProperties: !Sub >
             {
