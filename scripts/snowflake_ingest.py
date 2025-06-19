@@ -20,32 +20,29 @@ bucket = args["TARGET_S3_BUCKET"]
 tables = ["orders", "products", "departments", "aisles", "order_products__prior", "order_products__train"]
 
 for table_name in tables:
-    print(f"📥 Reading Snowflake table: {table_name}")
+    try:
+        print(f"📥 Reading Snowflake table: {table_name}")
 
-    # --- Read from Snowflake using Glue native connector ---
-    dyf = glueContext.create_dynamic_frame.from_options(
-        connection_type="snowflake",
-        connection_options={
-            "connectionName": connection_name,
-            "dbtable": table_name,
-            "sfDatabase": "IMBA",
-            "sfSchema": "PUBLIC",
-            "sfWarehouse": "COMPUTE_WH",
-            "sfRole": "ACCOUNTADMIN"
-        }
-    )
+        # --- Read from Snowflake using Glue native connector ---
+        dyf = glueContext.create_dynamic_frame.from_options(
+            connection_type="snowflake",
+            connection_options={
+                "connectionName": connection_name,
+                "dbtable": table_name,
+                "sfDatabase": "IMBA",
+                "sfSchema": "PUBLIC",
+                "sfWarehouse": "COMPUTE_WH",
+                "sfRole": "ACCOUNTADMIN"
+            }
+        )
+        row_count = dyf.count()
+        print(f"✔️ Retrieved {row_count} rows from {table_name}")
 
-    # --- Convert to Pandas DataFrame ---
-    df = dyf.toDF().limit(1000).toPandas()
-
-    # --- Save as Parquet ---
-    table = pa.Table.from_pandas(df)
-    local_file = f"/tmp/{table_name}.parquet"
-    pq.write_table(table, local_file)
-
-    # --- Upload to S3 ---
-    s3_key = f"snowflake_exports/{table_name}.parquet"
-    s3 = boto3.client("s3")
-    s3.upload_file(local_file, bucket, s3_key)
-
-    print(f"✅ Uploaded to s3://{bucket}/{s3_key}")
+        # --- Write DynamicFrame directly as Parquet to S3 ---
+        output_path = f"s3://{bucket}/snowflake_exports/{table_name}"
+        dyf.toDF().write.mode("overwrite").parquet(output_path)
+    
+        print(f"✅ Exported {table_name} to {output_path}")
+    
+    except Exception as e:
+        print(f"❗ Failed to process {table_name}: {e}")
