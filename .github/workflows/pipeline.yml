@@ -14,8 +14,8 @@ on:
       DataBucketName:
         description: "S3 Data Bucket Name"
         default: "data-bucket-chien"
-      deployGlueJob:
-        description: "Deploy Glue Job?"
+      csvCrawler:
+        description: "Run csv crawler Job?"
         required: true
         default: "false"
 
@@ -35,6 +35,7 @@ jobs:
           aws-region: ${{ github.event.inputs.region }}
 
       - name: Run crawler script - input csv
+        if: ${{ github.event.inputs.csvCrawler == 'true' }}
         run: |
           bash pipeline/run_crawler.sh
         env:
