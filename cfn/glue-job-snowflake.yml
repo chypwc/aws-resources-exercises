@@ -11,6 +11,9 @@ Parameters:
   JobName:
     Description: Name the Glue Job
     Type: String
+  SnowflakeAccount:
+    Description: snowflake account, e.g., DHxxxxX-AA1234
+    Type: String
 
 Resources:
   GlueServiceRole:
@@ -94,21 +97,21 @@ Resources:
       IpProtocol: "-1"
       SourceSecurityGroupId: !Ref GlueSecurityGroup
 
-  SnowflakeGlueConnectionV2:
+  SnowflakeGlueConnection:
     Type: AWS::Glue::Connection
     Properties:
       CatalogId: !Ref AWS::AccountId
       ConnectionInput:
         Name: snowflake-connection
-        ConnectionType: SNOWFLAKE
+        ConnectionType: "SNOWFLAKE"
         Description: Native Glue connection to Snowflake using Secrets Manager
         ConnectionProperties:
-          SECRET_ID: snowflake # Name of the secret in Secrets Manager
-          WAREHOUSE: COMPUTE_WH
-          DB: IMBA
-          SCHEMA: PUBLIC
-          ROLE: ACCOUNTADMIN
-          HOST: DHAHNFX-AM43103.snowflakecomputing.com
+          SparkProperties: !Sub >
+            {
+              "sfUrl": "https://${SnowflakeAccount}.snowflakecomputing.com",
+              "secretId": "snowflake-connection-secretid"
+            }
+          PythonProperties: "{}"
         PhysicalConnectionRequirements:
           SecurityGroupIdList:
             - !Ref GlueSecurityGroup

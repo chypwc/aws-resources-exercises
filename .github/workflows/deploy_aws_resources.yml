@@ -127,6 +127,7 @@ jobs:
             DataBucketName=${{ github.event.inputs.DataBucketName }},
             JobName=snowflake-ingest,
             ScriptName=snowflake_ingest.py
+            SnowflakeAccount=${{ secrets.SNOWFLAKE_ACCOUNT }}
 
       - name: Deploy Glue Crawler
         id: glue-crawler

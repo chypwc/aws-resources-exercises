@@ -29,10 +29,10 @@ for table_name in tables:
             connection_options={
                 "connectionName": connection_name,
                 "dbtable": table_name,
-                "sfDatabase": "IMBA",
-                "sfSchema": "PUBLIC",
-                "sfWarehouse": "COMPUTE_WH",
-                "sfRole": "ACCOUNTADMIN"
+                # "sfDatabase": "IMBA",
+                # "sfSchema": "PUBLIC",
+                # "sfWarehouse": "COMPUTE_WH",
+                # "sfRole": "ACCOUNTADMIN"
             }
         )
         row_count = dyf.count()
