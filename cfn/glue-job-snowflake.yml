@@ -83,6 +83,8 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: "0.0.0.0/0"
+        - IpProtocol: -1
+          SourceSecurityGroupId: !Ref GlueSecurityGroup
       Tags:
         - Key: Name
           Value: GlueSecurityGroup
@@ -98,8 +100,9 @@ Resources:
         Description: Glue connection to Snowflake using Secrets Manager and VPC
         ConnectionProperties:
           JDBC_CONNECTION_URL: !Sub "jdbc:snowflake://DHAHNFX-AM43103.snowflakecomputing.com:443/?db=IMBA&warehouse=COMPUTE_WH"
-          USERNAME: "{{resolve:secretsmanager:snowflake:SecretString:USERNAME}}"
-          PASSWORD: "{{resolve:secretsmanager:snowflake:SecretString:PASSWORD}}"
+          SECRET_ID: snowflake
+          # USERNAME: "{{resolve:secretsmanager:snowflake:SecretString:USERNAME}}"
+          # PASSWORD: "{{resolve:secretsmanager:snowflake:SecretString:PASSWORD}}"
 
         PhysicalConnectionRequirements:
           SecurityGroupIdList:
