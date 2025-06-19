@@ -70,32 +70,45 @@ Resources:
                   - codewhisperer:GetRecommendation
                 Resource: "*"
 
+  GlueSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for AWS Glue to access Snowflake over JDBC
+      VpcId: !ImportValue vpc-stack-VPCID # Ensure this value is exported from your VPC stack
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: "0.0.0.0/0"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "0.0.0.0/0"
+      Tags:
+        - Key: Name
+          Value: GlueSecurityGroup
+
   SnowflakeGlueConnection:
-  Type: AWS::Glue::Connection
-  Properties:
-    CatalogId: !Ref AWS::AccountId
+    Type: AWS::Glue::Connection
+    Properties:
+      CatalogId: !Ref AWS::AccountId
 
-    ConnectionInput:
-      Name: snowflake-connection
-      ConnectionType: JDBC
-      Description: Glue connection to Snowflake using Secrets Manager and VPC
-
-      ConnectionProperties:
+      ConnectionInput:
+        Name: snowflake-connection
+        ConnectionType: JDBC
+        Description: Glue connection to Snowflake using Secrets Manager and VPC
         ConnectionProperties:
-        JDBC_CONNECTION_URL: !Sub "jdbc:snowflake://DHAHNFX-AM43103.snowflakecomputing.com:443/?db=IMBA&warehouse=COMPUTE_WH"
-        USERNAME: !Sub "{{resolve:secretsmanager:${SnowflakeSecret}:SecretString:USERNAME}}"
-        PASSWORD: !Sub "{{resolve:secretsmanager:${SnowflakeSecret}:SecretString:PASSWORD}}"
+          JDBC_CONNECTION_URL: !Sub "jdbc:snowflake://DHAHNFX-AM43103.snowflakecomputing.com:443/?db=IMBA&warehouse=COMPUTE_WH"
+          USERNAME: !Sub "{{resolve:secretsmanager:${SnowflakeSecret}:SecretString:USERNAME}}"
+          PASSWORD: !Sub "{{resolve:secretsmanager:${SnowflakeSecret}:SecretString:PASSWORD}}"
 
-        CONNECTION_TYPE: "SNOWFLAKE"
-
-      # PhysicalConnectionRequirements:
-      #   SecurityGroupIdList:
-      #     - !Ref GlueSecurityGroup
-      #   SubnetId: !ImportValue vpc-stack-PrivateSubnet1
-      # AvailabilityZone: !Select
-      #   - 0
-      #   - !GetAZs
-      #     Ref: "AWS::Region"
+      PhysicalConnectionRequirements:
+        SecurityGroupIdList:
+          - !Ref GlueSecurityGroup
+        SubnetId: !ImportValue vpc-stack-PrivateSubnet1
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs
+          Ref: "AWS::Region"
 
   GlueJob:
     Type: AWS::Glue::Job
