@@ -95,38 +95,24 @@ jobs:
             DataBucketName=${{ github.event.inputs.DataBucketName }}
           capabilities: CAPABILITY_NAMED_IAM
 
-      - name: Upload Glue Script
-        # if: ${{ github.event.inputs.deployGlueJob == 'true' }}
-        run: |
-          aws s3 cp scripts/ s3://${{ github.event.inputs.SourceBucketName }}/scripts/ --recursive
+      # - name: Upload Glue Script
+      #   # if: ${{ github.event.inputs.deployGlueJob == 'true' }}
+      #   run: |
+      #     aws s3 cp scripts/ s3://${{ github.event.inputs.SourceBucketName }}/scripts/ --recursive
 
-      - name: Deploy Glue Job
-        id: glue-job-snowflake
-        if: ${{ github.event.inputs.deployGlueJob == 'true' }}
-        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
-        with:
-          name: glue-job
-          template: cfn/glue-job.yml
-          capabilities: CAPABILITY_NAMED_IAM
-          parameter-overrides: >-
-            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
-            DataBucketName=${{ github.event.inputs.DataBucketName }},
-            JobName=sales-aggregation-job,
-            ScriptName=sales_etl.py
-
-      - name: Deploy Glue Job
-        id: glue-job
-        if: ${{ github.event.inputs.deployGlueJob == 'true' }}
-        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
-        with:
-          name: glue-job
-          template: cfn/glue-job.yml
-          capabilities: CAPABILITY_NAMED_IAM
-          parameter-overrides: >-
-            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
-            DataBucketName=${{ github.event.inputs.DataBucketName }},
-            JobName=sales-aggregation-job,
-            ScriptName=sales_etl.py
+      # - name: Deploy Glue Job
+      #   id: glue-job
+      #   if: ${{ github.event.inputs.deployGlueJob == 'true' }}
+      #   uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+      #   with:
+      #     name: glue-job
+      #     template: cfn/glue-job.yml
+      #     capabilities: CAPABILITY_NAMED_IAM
+      #     parameter-overrides: >-
+      #       SourceBucketName=${{ github.event.inputs.SourceBucketName }},
+      #       DataBucketName=${{ github.event.inputs.DataBucketName }},
+      #       JobName=sales-aggregation-job,
+      #       ScriptName=sales_etl.py
 
       - name: loading from snowflake glue job
         id: glue-job-snowflake
