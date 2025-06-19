@@ -29,6 +29,7 @@ sf_account = secret_dict["ACCOUNT"]
 sf_warehouse = secret_dict.get("sfWarehouse", "COMPUTE_WH")
 sf_database = secret_dict.get("sfDatabase", "IMBA")
 sf_schema = secret_dict.get("sfSchema", "PUBLIC")
+sf_role = secret_dict.get("sfRole", "ACCOUNTADMIN")
 
 # --- Snowflake tables to export ---
 tables = ["orders", "products", "departments", "aisles", "order_products__prior", "order_products__train"]
@@ -47,7 +48,8 @@ for table_name in tables:
                 "sfDatabase": sf_database,
                 "sfSchema": sf_schema,
                 "sfWarehouse": sf_warehouse,
-                "dbtable": table_name
+                "dbtable": table_name,
+                "sfRole": sf_role
             }
         )
         row_count = dyf.count()
