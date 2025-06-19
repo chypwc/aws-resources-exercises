@@ -38,7 +38,6 @@ jobs:
         run: |
           bash pipeline/run_crawler.sh
         env:
-          SourceBucketName: ${{ github.event.inputs.SourceBucketName }}
           CrawlerName: source-csv-crawler
 
       # - name: Run Glue job and wait
@@ -46,3 +45,9 @@ jobs:
 
       - name: Run Glue job and wait
         run: ./scripts/glue_runner.sh snowflake-ingest
+
+      - name: Run crawler script
+        run: |
+          bash pipeline/run_crawler.sh
+        env:
+          CrawlerName: snowflake_input_crawler

@@ -95,21 +95,24 @@ jobs:
             DataBucketName=${{ github.event.inputs.DataBucketName }}
           capabilities: CAPABILITY_NAMED_IAM
 
-      - name: Deploy Glue Crawler
-        id: glue-crawler
-        if: ${{ github.event.inputs.deployCrawler == 'true' }}
-        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
-        with:
-          name: glue-crawler
-          template: cfn/glue-crawler.yml
-          capabilities: CAPABILITY_NAMED_IAM
-          parameter-overrides: >-
-            SourceBucketName=${{ github.event.inputs.SourceBucketName }}
-
       - name: Upload Glue Script
         # if: ${{ github.event.inputs.deployGlueJob == 'true' }}
         run: |
           aws s3 cp scripts/ s3://${{ github.event.inputs.SourceBucketName }}/scripts/ --recursive
+
+      - name: Deploy Glue Job
+        id: glue-job-snowflake
+        if: ${{ github.event.inputs.deployGlueJob == 'true' }}
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        with:
+          name: glue-job
+          template: cfn/glue-job.yml
+          capabilities: CAPABILITY_NAMED_IAM
+          parameter-overrides: >-
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
+            DataBucketName=${{ github.event.inputs.DataBucketName }},
+            JobName=sales-aggregation-job,
+            ScriptName=sales_etl.py
 
       - name: Deploy Glue Job
         id: glue-job
@@ -125,39 +128,6 @@ jobs:
             JobName=sales-aggregation-job,
             ScriptName=sales_etl.py
 
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.10.18
-
-      # - name: Prepare and upload Python wheels for Glue 4.0 (Py3.10)
-      #   run: |
-      #     mkdir -p glue_wheels temp
-      #     python3 -m pip install --upgrade pip
-
-      #     pip download \
-      #       --only-binary=:all: \
-      #       --platform manylinux2014_x86_64 \
-      #       --python-version 3.10 \
-      #       --implementation cp \
-      #       --abi cp310 \
-      #       --dest temp \
-      #       snowflake-connector-python pandas pyarrow boto3
-
-      #     # Zip all .whl files
-      #     cd temp
-      #     zip ../glue_wheels.zip ./*.whl
-      #     cd ..
-
-      #     # Upload to S3
-      #     aws s3 cp glue_wheels.zip s3://${{ github.event.inputs.SourceBucketName }}/libs/glue_wheels.zip
-
-      - name: Upload Glue Script and requirements.txt
-        # if: ${{ github.event.inputs.deployGlueJob == 'true' }}
-        run: |
-          aws s3 cp scripts/ s3://${{ github.event.inputs.SourceBucketName }}/scripts/ --recursive
-          aws s3 cp libs/ s3://${{ github.event.inputs.SourceBucketName }}/libs/ --recursive
-
       - name: loading from snowflake glue job
         id: glue-job-snowflake
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
@@ -170,3 +140,31 @@ jobs:
             DataBucketName=${{ github.event.inputs.DataBucketName }},
             JobName=snowflake_ingest,
             ScriptName=snowflake_ingest.py,
+
+      - name: Deploy Glue Crawler
+        id: glue-crawler
+        if: ${{ github.event.inputs.deployCrawler == 'true' }}
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        with:
+          name: glue-crawler
+          template: cfn/glue-crawler.yml
+          capabilities: CAPABILITY_NAMED_IAM
+          parameter-overrides: >-
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }}
+            TargetPath=s3://${{ github.event.inputs.SourceBucketName }}/input/
+            CrawlerName=source-csv-crawler
+            Database=sales_db
+
+      - name: Deploy Glue Crawler
+        id: glue-crawler-snowflake
+        if: ${{ github.event.inputs.deployCrawler == 'true' }}
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        with:
+          name: glue-crawler-snowflake
+          template: cfn/glue-crawler.yml
+          capabilities: CAPABILITY_NAMED_IAM
+          parameter-overrides: >-
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }}
+            TargetPath=s3://${{ github.event.inputs.SourceBucketName }}/snowflake_exports/
+            CrawlerName=snowflake_input_crawler
+            Database=imba

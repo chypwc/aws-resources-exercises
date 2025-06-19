@@ -2,18 +2,26 @@ Parameters:
   SourceBucketName:
     Description: Name the source Bucket
     Type: String
+  TargetPath:
+    Description: Path to the target folder
+    Type: String
+  CrawlerName:
+    Description: Crawler name
+    Type: String
+  Database:
+    Description: database or schema in Data Catalog.
+    Type: String
 
 Resources:
   GlueCrawler:
     Type: AWS::Glue::Crawler
     Properties:
-      Name: source-csv-crawler
+      Name: !Sub "${CrawlerName}"
       Role: !GetAtt GlueCrawlerRole.Arn
-      DatabaseName: sales_db
+      DatabaseName: !Sub "${Database}"
       Targets:
         S3Targets:
-          - Path: !Sub "s3://${SourceBucketName}/input/"
-          - Path: !Sub "s3://${SourceBucketName}/snowflake_exports/"
+          - Path: !Sub "${TargetPath}"
       TablePrefix: ""
       SchemaChangePolicy:
         UpdateBehavior: UPDATE_IN_DATABASE
