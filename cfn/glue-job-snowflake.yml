@@ -97,12 +97,10 @@ Resources:
       GlueVersion: "4.0"
       WorkerType: G.1X
       NumberOfWorkers: 5
-      Timeout: 3 # in minutes
+      Timeout: 3
       ExecutionClass: FLEX
       ExecutionProperty:
         MaxConcurrentRuns: 1
-      SparkProperties:
-        SparkSubmitParameters: "--conf spark.sql.sources.partitionOverwriteMode=dynamic"
       Command:
         Name: glueetl
         ScriptLocation: !Sub "s3://${SourceBucketName}/scripts/${ScriptName}"
@@ -112,7 +110,8 @@ Resources:
         "--job-language": "python"
         "--enable-continuous-cloudwatch-log": "true"
         "--enable-metrics": "true"
-        "--SF_SECRET_NAME": "snowflake" # Optional: if your script loads secrets
+        "--conf": "spark.sql.sources.partitionOverwriteMode=dynamic"
+        "--SF_SECRET_NAME": "snowflake"
         "--TARGET_S3_BUCKET": !Ref SourceBucketName
       Connections:
         Connections:
