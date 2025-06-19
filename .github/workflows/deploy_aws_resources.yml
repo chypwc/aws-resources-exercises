@@ -124,8 +124,8 @@ jobs:
           parameter-overrides: >-
             SourceBucketName=${{ github.event.inputs.SourceBucketName }},
             DataBucketName=${{ github.event.inputs.DataBucketName }},
-            JobName=snowflake_ingest,
-            ScriptName=snowflake_ingest.py,
+            JobName=snowflake-ingest,
+            ScriptName=snowflake_ingest.py
 
       - name: Deploy Glue Crawler
         id: glue-crawler
@@ -136,9 +136,9 @@ jobs:
           template: cfn/glue-crawler.yml
           capabilities: CAPABILITY_NAMED_IAM
           parameter-overrides: >-
-            SourceBucketName=${{ github.event.inputs.SourceBucketName }}
-            TargetPath=s3://${{ github.event.inputs.SourceBucketName }}/input/
-            CrawlerName=source-csv-crawler
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
+            TargetPath=s3://${{ github.event.inputs.SourceBucketName }}/input/,
+            CrawlerName=source-csv-crawler,
             Database=sales_db
 
       - name: Deploy Glue Crawler
@@ -150,7 +150,7 @@ jobs:
           template: cfn/glue-crawler.yml
           capabilities: CAPABILITY_NAMED_IAM
           parameter-overrides: >-
-            SourceBucketName=${{ github.event.inputs.SourceBucketName }}
-            TargetPath=s3://${{ github.event.inputs.SourceBucketName }}/snowflake_exports/
-            CrawlerName=snowflake_input_crawler
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
+            TargetPath=s3://${{ github.event.inputs.SourceBucketName }}/snowflake_exports/,
+            CrawlerName=snowflake_input_crawler,
             Database=imba
