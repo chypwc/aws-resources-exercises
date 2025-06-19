@@ -15,7 +15,7 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Sid: Read_and_write_databases
+              - Sid: Read-and-write_databases
                 Effect: Allow
                 Action:
                   - glue:SearchTables
