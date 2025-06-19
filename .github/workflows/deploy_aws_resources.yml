@@ -156,3 +156,10 @@ jobs:
             TargetPath=s3://${{ github.event.inputs.SourceBucketName }}/snowflake_exports/,
             CrawlerName=snowflake_input_crawler,
             Database=imba
+
+      - name: dbt role
+        id: dbt-glue-role
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        with:
+          name: dbt-glue-role
+          template: cfn/dbt-role.yml

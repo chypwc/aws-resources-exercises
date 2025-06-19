@@ -12,8 +12,8 @@ models:
 
 sources:
   - name: bronze_source # This is the source name (used in `source('public', ...)`)
-    database: jr_lab_db1
-    schema: bronze # This is the actual Snowflake schema name
+    # database:
+    schema: sales_db # This is the actual Snowflake schema name
     tables:
       - name: nations_raw
       - name: regions_raw

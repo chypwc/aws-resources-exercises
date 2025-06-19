@@ -90,12 +90,12 @@ Resources:
   #       - Key: Name
   #         Value: GlueSecurityGroup
 
-  GlueSecurityGroupSelfIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !Ref GlueSecurityGroup
-      IpProtocol: "-1"
-      SourceSecurityGroupId: !Ref GlueSecurityGroup
+  # GlueSecurityGroupSelfIngress:
+  # Type: AWS::EC2::SecurityGroupIngress
+  # Properties:
+  #   GroupId: !Ref GlueSecurityGroup
+  #   IpProtocol: "-1"
+  #   SourceSecurityGroupId: !Ref GlueSecurityGroup
 
   SnowflakeGlueConnection:
     Type: AWS::Glue::Connection

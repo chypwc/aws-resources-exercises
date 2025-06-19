@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: IAM Role for dbt to use AWS Glue
+
+Resources:
+  DbtGlueExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: DbtGlueExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: DbtGlueCustomPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              # Allow writing to S3 for outputs and logs
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:DeleteObject
+                Resource: "*"
+
+              # Allow Secrets Manager for credentials (optional)
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: "*"
+
+              # Optional: Allow Athena or other services if used
+              - Effect: Allow
+                Action:
+                  - athena:StartQueryExecution
+                  - athena:GetQueryExecution
+                  - athena:GetQueryResults
+                Resource: "*"
+
+  DbtPassRolePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: AllowPassDbtGlueRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: iam:PassRole
+            Resource: !GetAtt DbtGlueExecutionRole.Arn
+            Condition:
+              StringEquals:
+                iam:PassedToService: glue.amazonaws.com
+      Roles:
+        - !Ref DbtGlueExecutionRole

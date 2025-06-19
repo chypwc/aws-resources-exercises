@@ -44,10 +44,10 @@ jobs:
       # - name: Run Glue job and wait
       #   run: ./scripts/glue_runner.sh sales-aggregation-job
 
-      - name: Run Glue job and wait - snowflake_exports
+      - name: Run Glue job and wait - snowflake exports
         run: ./pipeline/glue_runner.sh snowflake-ingest
 
-      - name: Run crawler script
+      - name: Run crawler script - snowflake exports
         run: |
           bash pipeline/run_crawler.sh
         env:
