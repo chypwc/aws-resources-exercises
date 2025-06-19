@@ -115,14 +115,14 @@ Resources:
             {
               "account": "${SnowflakeAccount}"
             }
-        PhysicalConnectionRequirements:
-          SecurityGroupIdList:
-            - !Ref GlueSecurityGroup
-          SubnetId: !ImportValue vpc-stack-PrivateSubnet1
-          AvailabilityZone: !Select
-            - 0
-            - !GetAZs
-              Ref: "AWS::Region"
+        # PhysicalConnectionRequirements:
+        #   SecurityGroupIdList:
+        #     - !Ref GlueSecurityGroup
+        #   SubnetId: !ImportValue vpc-stack-PrivateSubnet1
+        #   AvailabilityZone: !Select
+        #     - 0
+        #     - !GetAZs
+        #       Ref: "AWS::Region"
 
   GlueJob:
     Type: AWS::Glue::Job
@@ -134,7 +134,7 @@ Resources:
       WorkerType: G.1X
       NumberOfWorkers: 5
       Timeout: 60 # minutes
-      ExecutionClass: FLEX
+      ExecutionClass: STANDARD # or FLEX
       ExecutionProperty:
         MaxConcurrentRuns: 1
       Command:
