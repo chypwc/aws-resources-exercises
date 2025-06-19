@@ -83,11 +83,16 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: "0.0.0.0/0"
-        - IpProtocol: -1
-          SourceSecurityGroupId: !Ref GlueSecurityGroup
       Tags:
         - Key: Name
           Value: GlueSecurityGroup
+
+  GlueSecurityGroupSelfIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref GlueSecurityGroup
+      IpProtocol: "-1"
+      SourceSecurityGroupId: !Ref GlueSecurityGroup
 
   SnowflakeGlueConnection:
     Type: AWS::Glue::Connection
