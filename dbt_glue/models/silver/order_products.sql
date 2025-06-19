@@ -11,7 +11,7 @@ SELECT
     add_to_cart_order,
     reordered,
     'prior' AS eval_set
-FROM {{ ref('order_products__prior') }}
+FROM {{ source('sources', 'order_products__prior') }}
 
 UNION ALL
 
@@ -21,4 +21,4 @@ SELECT
     add_to_cart_order,
     reordered,
     'train' AS eval_set
-FROM {{ ref('order_products__train') }}
+FROM {{ source('sources', 'order_products__train') }}

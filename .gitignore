@@ -50,3 +50,9 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# dbt
+dbt_glue/target/
+dbt_glue/dbt_packages/
+dbt_glue/logs/
+dbt_glue/profile.yml

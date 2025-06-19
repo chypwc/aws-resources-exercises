@@ -1,0 +1,50 @@
+version: 2
+
+sources:
+  - name: sources
+    schema: sales_db
+    description: >
+      Raw source tables ingested into AWS Glue Data Catalog. These are
+      extracted from Instacart's online grocery shopping dataset.
+
+    tables:
+      - name: order_products__prior
+        description: >
+          Contains the products previously purchased in prior orders.
+          Joins with `orders` on `order_id` and `products` on `product_id`.
+
+      - name: order_products__train
+        description: >
+          Contains products that users purchased in the training set.
+          Joins with `orders` on `order_id` and `products` on `product_id`.
+
+      - name: orders
+        description: >
+          Contains all customer orders with metadata on order timing and sequence.
+          * order_id: order identifier
+          * user_id: customer identifier
+          * eval_set: one of ['prior', 'train', 'test']
+          * order_number: sequential order number per user
+          * order_dow: day of week order placed (0=Sunday)
+          * order_hour_of_day: hour order placed (0-23)
+          * days_since_prior: days since previous order (NA if first order)
+
+      - name: products
+        description: >
+          Master product list with name and foreign keys for department and aisle.
+          * product_id: unique product ID
+          * product_name: name of product
+          * aisle_id: foreign key to `aisles`
+          * department_id: foreign key to `departments`
+
+      - name: aisles
+        description: >
+          Contains unique aisles (e.g., beverages, snacks) mapped by ID.
+          * aisle_id: identifier
+          * aisle: name of aisle
+
+      - name: departments
+        description: >
+          Contains unique departments (e.g., dairy, produce) mapped by ID.
+          * department_id: identifier
+          * department: name of department
