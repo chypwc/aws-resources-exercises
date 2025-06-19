@@ -80,32 +80,22 @@ Resources:
       ConnectionType: JDBC
       Description: Glue connection to Snowflake using Secrets Manager and VPC
 
-      ConnectionProperties: 
-        JDBC_CONNECTION_URL: !Join 
-          - ""
-          - - "jdbc:snowflake://"
-            - "DHAHNFX-AM43103"  # Replace with your Snowflake account, e.g., abcd-xy12345.ap-southeast-2
-            - ".snowflakecomputing.com:443/?db=IMBA&warehouse=COMPUTE_WH" # Replace db and warehouse
+      ConnectionProperties:
+        ConnectionProperties:
+        JDBC_CONNECTION_URL: !Sub "jdbc:snowflake://DHAHNFX-AM43103.snowflakecomputing.com:443/?db=IMBA&warehouse=COMPUTE_WH"
+        USERNAME: !Sub "{{resolve:secretsmanager:${SnowflakeSecret}:SecretString:USERNAME}}"
+        PASSWORD: !Sub "{{resolve:secretsmanager:${SnowflakeSecret}:SecretString:PASSWORD}}"
 
-        USERNAME: !Join 
-          - ""
-          - - "{{resolve:secretsmanager:"
-            - !Ref SnowflakeSecret
-            - ":SecretString:USERNAME}}"
+        CONNECTION_TYPE: "SNOWFLAKE"
 
-        PASSWORD: !Join 
-          - ""
-          - - "{{resolve:secretsmanager:"
-            - !Ref SnowflakeSecret
-            - ":SecretString:PASSWORD}}"
-
-        CONNECTION_TYPE: "Snowflake"
-
-      PhysicalConnectionRequirements:
-        SecurityGroupIdList:
-          - !Ref GlueSecurityGroup
-        SubnetId: !ImportValue vpc-stack-PrivateSubnet1
-        AvailabilityZone: !Select [0, !GetAZs !Ref "AWS::Region"]
+      # PhysicalConnectionRequirements:
+      #   SecurityGroupIdList:
+      #     - !Ref GlueSecurityGroup
+      #   SubnetId: !ImportValue vpc-stack-PrivateSubnet1
+      # AvailabilityZone: !Select
+      #   - 0
+      #   - !GetAZs
+      #     Ref: "AWS::Region"
 
   GlueJob:
     Type: AWS::Glue::Job
@@ -133,7 +123,6 @@ Resources:
         "--SF_SECRET_NAME": "snowflake"
         "--TARGET_S3_BUCKET": !Ref SourceBucketName
       Connections:
-        Connections:
-          - snowflake-connection
+        - snowflake-connection
       Tags:
         Environment: dev
