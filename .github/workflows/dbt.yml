@@ -14,7 +14,14 @@ jobs:
         with:
           python-version: 3.10
 
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/GitHubActionsRole
+      #     aws-region: ap-southeast-2
+
       - name: Install AWS CLI and dbt-glue
+        # use aws cli2?
         run: |
           pip install awscli dbt-glue
 

@@ -1,0 +1,31 @@
+Parameters:
+
+GitHubActionsRole:
+  Type: AWS::IAM::Role
+  Properties:
+    RoleName: GitHubActionsRole
+    AssumeRolePolicyDocument:
+      Version: "2012-10-17"
+      Statement:
+        - Effect: Allow
+          Principal:
+            Federated: arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com
+          Action: sts:AssumeRoleWithWebIdentity
+          Condition:
+            StringLike:
+              token.actions.githubusercontent.com:sub: repo:<GitHubOrg>/<RepoName>:*
+    Policies:
+      - PolicyName: GitHubActionsGlueAccess
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - glue:StartJobRun
+                - glue:StartSession
+                - glue:GetJobRun
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - iam:PassRole
+              Resource: arn:aws:iam::<ACCOUNT_ID>:role/DbtGlueExecutionRole

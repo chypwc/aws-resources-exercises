@@ -164,3 +164,6 @@ jobs:
           name: dbt-glue-role
           template: cfn/dbt-role.yml
           capabilities: CAPABILITY_NAMED_IAM
+          parameter-overrides: >-
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
+            DataBucketName=${{ github.event.inputs.DataBucketName }},
