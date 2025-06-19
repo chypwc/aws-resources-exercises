@@ -1,9 +1,7 @@
 {{ config(
-    materialized='incremental',
-    file_format='parquet',
-    incremental_strategy='insert_overwrite',
-    partition_by=['eval_set']
-) }}
+    materialized='table',
+    schema='imba_silver', 
+    custom_location='s3://source-bucket-chien/imba-output/silver/order_products') }}
 
 SELECT
     order_id,

@@ -22,3 +22,162 @@ models:
 
       - name: eval_set
         description: "Data split type: 'prior' or 'train'"
+
+  - name: order_products_prior
+    description: >
+      Joined data between orders and order_products for the 'prior' evaluation set,
+      stored in sales_silver schema.
+    columns:
+      - name: order_id
+        description: Unique identifier for each order
+        tests:
+          - not_null
+          - unique
+
+      - name: user_id
+        description: Identifier for the user who placed the order
+        tests:
+          - not_null
+
+      - name: order_number
+        description: Sequence number of the order for each user
+
+      - name: order_dow
+        description: Day of the week the order was placed
+
+      - name: order_hour_of_day
+        description: Hour of the day the order was placed
+
+      - name: days_since_prior
+        description: Days since the user’s previous order (nullable for first orders)
+
+      - name: product_id
+        description: ID of the product in the order
+        tests:
+          - not_null
+
+      - name: add_to_cart_order
+        description: Order in which the product was added to the cart
+
+      - name: reordered
+        description: 1 if the product has been ordered by the user before, 0 otherwise
+
+  - name: user_features_1
+    description: >
+      Aggregated order statistics per user, including maximum order number,
+      total days since prior orders, and average days between orders.
+    columns:
+      - name: user_id
+        description: Unique identifier for each user
+        tests:
+          - not_null
+          - unique
+
+      - name: max_order_number
+        description: The highest order number placed by the user
+        tests:
+          - not_null
+
+      - name: total_days_since_prior
+        description: Sum of days since prior orders for the user
+        tests:
+          - not_null
+
+      - name: avg_days_since_prior
+        description: Average number of days between orders for the user
+        tests:
+          - not_null
+
+  - name: user_features_2
+    description: >
+      User-level features derived from prior orders, including product count,
+      distinct product count, and reorder ratio.
+    columns:
+      - name: user_id
+        description: Unique identifier for the user
+        tests:
+          - not_null
+          - unique
+
+      - name: total_number_products
+        description: Total number of products ordered by the user
+        tests:
+          - not_null
+
+      - name: total_number_distinct_products
+        description: Number of distinct products ordered by the user
+        tests:
+          - not_null
+
+      - name: user_reorder_ratio
+        description: >
+          The ratio of reordered products to the number of orders after the first.
+          Calculated as (sum of reorders) / (number of orders after first).
+        tests:
+          - not_null
+
+  - name: up_feature
+    description: >
+      User-product level features from prior orders. Includes total orders, 
+      first and last order number, and average position in cart.
+    columns:
+      - name: user_id
+        description: Unique identifier for the user
+        tests:
+          - not_null
+
+      - name: product_id
+        description: Unique identifier for the product
+        tests:
+          - not_null
+
+      - name: total_number_orders
+        description: Total number of orders the user has placed that included this product
+        tests:
+          - not_null
+
+      - name: min_order_number
+        description: The earliest order number in which the user purchased this product
+        tests:
+          - not_null
+
+      - name: max_order_number
+        description: The most recent order number in which the user purchased this product
+        tests:
+          - not_null
+
+      - name: avg_add_to_cart_order
+        description: Average position in cart when the product was added by the user
+        tests:
+          - not_null
+
+  - name: prd_features
+    description: >
+      Product-level features extracted from user purchase history,
+      focusing on purchase frequency and reorder patterns.
+    columns:
+      - name: product_id
+        description: Unique identifier for each product
+        tests:
+          - not_null
+          - unique
+
+      - name: total_purchases
+        description: Total number of times the product was purchased
+        tests:
+          - not_null
+
+      - name: total_reorder
+        description: Total number of times the product was reordered
+        tests:
+          - not_null
+
+      - name: first_time_purchases
+        description: Number of users who purchased this product for the first time
+        tests:
+          - not_null
+
+      - name: second_time_purchases
+        description: Number of users who purchased this product a second time
+        tests:
+          - not_null

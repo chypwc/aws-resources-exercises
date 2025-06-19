@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: sources
-    schema: sales_db
+    schema: imba
     description: >
       Raw source tables ingested into AWS Glue Data Catalog. These are
       extracted from Instacart's online grocery shopping dataset.
