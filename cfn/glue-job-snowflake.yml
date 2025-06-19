@@ -111,7 +111,10 @@ Resources:
               "sfUrl": "https://${SnowflakeAccount}.snowflakecomputing.com",
               "secretId": "snowflake-connection-secretid"
             }
-          PythonProperties: "{}"
+          PythonProperties: !Sub >
+            {
+              "account": "${SnowflakeAccount}"
+            }
         PhysicalConnectionRequirements:
           SecurityGroupIdList:
             - !Ref GlueSecurityGroup
