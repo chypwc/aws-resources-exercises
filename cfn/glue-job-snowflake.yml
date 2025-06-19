@@ -71,25 +71,6 @@ Resources:
                 Resource: "*"
 
   SnowflakeGlueConnection:
-    Type: AWS::Glue::Connection
-    Properties:
-      CatalogId: !Ref AWS::AccountId
-      ConnectionInput:
-        Name: snowflake-connection
-        ConnectionType: SNOWFLAKE
-        Description: Glue connection to Snowflake using Secrets Manager
-        ConnectionProperties:
-          CONNECTION_NAME: snowflake-connection
-          SECRET_ID: snowflake
-          JDBC_CONNECTION_URL: "jdbc:snowflake://DHAHNFX-AM43103.snowflakecomputing.com:443"
-        # Optional: Uncomment the following if using VPC interface endpoints
-        # PhysicalConnectionRequirements:
-        #   SubnetId: !Ref GlueSubnetId
-        #   SecurityGroupIdList:
-        #     - !Ref GlueSecurityGroup
-
-
-  SnowflakeGlueConnection:
   Type: AWS::Glue::Connection
   Properties:
     CatalogId: !Ref AWS::AccountId
