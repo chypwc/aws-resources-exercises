@@ -73,22 +73,22 @@ Resources:
                   - codewhisperer:GetRecommendation
                 Resource: "*"
 
-  GlueSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Security group for AWS Glue to access Snowflake over JDBC
-      VpcId: !ImportValue vpc-stack-VPCId # Ensure this value is exported from your VPC stack
-      SecurityGroupEgress:
-        - IpProtocol: "-1"
-          CidrIp: "0.0.0.0/0"
-      SecurityGroupIngress:
-        - IpProtocol: "tcp"
-          FromPort: 443
-          ToPort: 443
-          CidrIp: "0.0.0.0/0"
-      Tags:
-        - Key: Name
-          Value: GlueSecurityGroup
+  # GlueSecurityGroup:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties:
+  #     GroupDescription: Security group for AWS Glue to access Snowflake over JDBC
+  #     VpcId: !ImportValue vpc-stack-VPCId # Ensure this value is exported from your VPC stack
+  #     SecurityGroupEgress:
+  #       - IpProtocol: "-1"
+  #         CidrIp: "0.0.0.0/0"
+  #     SecurityGroupIngress:
+  #       - IpProtocol: "tcp"
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: "0.0.0.0/0"
+  #     Tags:
+  #       - Key: Name
+  #         Value: GlueSecurityGroup
 
   GlueSecurityGroupSelfIngress:
     Type: AWS::EC2::SecurityGroupIngress
