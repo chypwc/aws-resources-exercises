@@ -163,3 +163,4 @@ jobs:
         with:
           name: dbt-glue-role
           template: cfn/dbt-role.yml
+          capabilities: CAPABILITY_NAMED_IAM

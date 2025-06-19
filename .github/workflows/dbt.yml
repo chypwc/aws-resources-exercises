@@ -29,14 +29,14 @@ jobs:
           outputs:
               dev:
               type: glue
-              role_arn: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.GLUE_ROLE_NAME }}
+              role_arn: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/DbtGlueExecutionRole
               region: ap-southeast-2
               workers: 5
               worker_type: G.1X
               schema: my_schema
               database: my_database
               glue_version: 3.0
-              iam_role: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.GLUE_ROLE_NAME }}
+              iam_role: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/DbtGlueExecutionRole
           EOF
 
       - name: Run dbt on Glue Interactive Sessions
