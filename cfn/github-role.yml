@@ -1,4 +1,7 @@
 Parameters:
+  AccountId:
+    Description: Account ID
+    Type: String
 
 GitHubActionsRole:
   Type: AWS::IAM::Role
@@ -9,7 +12,7 @@ GitHubActionsRole:
       Statement:
         - Effect: Allow
           Principal:
-            Federated: arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com
+            Federated: !Sub arn:aws:iam::${AccountId}:oidc-provider/token.actions.githubusercontent.com
           Action: sts:AssumeRoleWithWebIdentity
           Condition:
             StringLike:
