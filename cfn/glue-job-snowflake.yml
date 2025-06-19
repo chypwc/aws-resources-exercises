@@ -88,10 +88,48 @@ Resources:
         #   SecurityGroupIdList:
         #     - !Ref GlueSecurityGroup
 
+
+  SnowflakeGlueConnection:
+  Type: AWS::Glue::Connection
+  Properties:
+    CatalogId: !Ref AWS::AccountId
+
+    ConnectionInput:
+      Name: snowflake-connection
+      ConnectionType: JDBC
+      Description: Glue connection to Snowflake using Secrets Manager and VPC
+
+      ConnectionProperties: 
+        JDBC_CONNECTION_URL: !Join 
+          - ""
+          - - "jdbc:snowflake://"
+            - "DHAHNFX-AM43103"  # Replace with your Snowflake account, e.g., abcd-xy12345.ap-southeast-2
+            - ".snowflakecomputing.com:443/?db=IMBA&warehouse=COMPUTE_WH" # Replace db and warehouse
+
+        USERNAME: !Join 
+          - ""
+          - - "{{resolve:secretsmanager:"
+            - !Ref SnowflakeSecret
+            - ":SecretString:USERNAME}}"
+
+        PASSWORD: !Join 
+          - ""
+          - - "{{resolve:secretsmanager:"
+            - !Ref SnowflakeSecret
+            - ":SecretString:PASSWORD}}"
+
+        CONNECTION_TYPE: "Snowflake"
+
+      PhysicalConnectionRequirements:
+        SecurityGroupIdList:
+          - !Ref GlueSecurityGroup
+        SubnetId: !ImportValue vpc-stack-PrivateSubnet1
+        AvailabilityZone: !Select [0, !GetAZs !Ref "AWS::Region"]
+
   GlueJob:
     Type: AWS::Glue::Job
     Properties:
-      Name: !Ref JobName
+      Name: !Sub "${JobName}"
       Role: !GetAtt GlueServiceRole.Arn
       Description: "Glue Spark job to ingest data from Snowflake"
       GlueVersion: "4.0"
