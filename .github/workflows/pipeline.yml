@@ -34,7 +34,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ github.event.inputs.region }}
 
-      - name: Run crawler script
+      - name: Run crawler script - input csv
         run: |
           bash pipeline/run_crawler.sh
         env:
@@ -43,8 +43,8 @@ jobs:
       # - name: Run Glue job and wait
       #   run: ./scripts/glue_runner.sh sales-aggregation-job
 
-      - name: Run Glue job and wait
-        run: ./scripts/glue_runner.sh snowflake-ingest
+      - name: Run Glue job and wait - snowflake_exports
+        run: ./pipeline/glue_runner.sh snowflake-ingest
 
       - name: Run crawler script
         run: |

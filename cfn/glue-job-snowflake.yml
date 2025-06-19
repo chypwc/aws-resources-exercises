@@ -134,7 +134,7 @@ Resources:
       WorkerType: G.1X
       NumberOfWorkers: 5
       Timeout: 60 # minutes
-      ExecutionClass: STANDARD # or FLEX
+      ExecutionClass: FLEX # STANDARD or FLEX
       ExecutionProperty:
         MaxConcurrentRuns: 1
       Command:
