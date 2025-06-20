@@ -52,9 +52,9 @@ jobs:
           capabilities: CAPABILITY_NAMED_IAM
           # parameter-overrides: "${{ env.PARAMS }}"
           parameter-overrides: >-
-            AccountId=${{ secrets.AWS_ACCOUNT_ID }}
-            GitHubRepo=${{ github.repository }}
-            SourceBucketName=${{ github.event.inputs.SourceBucketName }}
+            AccountId=${{ secrets.AWS_ACCOUNT_ID }},
+            GitHubRepo=${{ github.repository }},
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
             DataBucketName=${{ github.event.inputs.DataBucketName }}
 
   deploy-dbt-glue:
