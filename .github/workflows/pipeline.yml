@@ -19,6 +19,10 @@ on:
         required: true
         default: "false"
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read # Allows checkout of source code
+
 jobs:
   pipeline:
     runs-on: ubuntu-latest
