@@ -41,6 +41,10 @@ on:
         description: "Deploy Glue Job?"
         required: true
         default: "false"
+      deployAssumeRole:
+        description: "Deploy Github action role?"
+        default: "false"
+        required: true
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -49,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         id: creds
@@ -114,7 +118,7 @@ jobs:
       #       JobName=sales-aggregation-job,
       #       ScriptName=sales_etl.py
 
-      - name: Deploy snowflake glue job
+      - name: Deploy snowflake ingestion glue job
         if: ${{ github.event.inputs.deployGlueJob == 'true' }}
         id: glue-job-snowflake
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
@@ -129,21 +133,21 @@ jobs:
             ScriptName=snowflake_ingest.py,
             SnowflakeAccount=${{ secrets.SNOWFLAKE_ACCOUNT }}
 
-      - name: Deploy Glue Crawler
-        id: glue-crawler
-        if: ${{ github.event.inputs.deployCrawler == 'true' }}
-        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
-        with:
-          name: glue-crawler
-          template: cfn/glue-crawler.yml
-          capabilities: CAPABILITY_NAMED_IAM
-          parameter-overrides: >-
-            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
-            TargetPath=s3://${{ github.event.inputs.SourceBucketName }}/input/,
-            CrawlerName=source-csv-crawler,
-            Database=sales_db
+      # - name: Deploy Glue Crawler
+      #   id: glue-crawler
+      #   if: ${{ github.event.inputs.deployCrawler == 'true' }}
+      #   uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+      #   with:
+      #     name: glue-crawler
+      #     template: cfn/glue-crawler.yml
+      #     capabilities: CAPABILITY_NAMED_IAM
+      #     parameter-overrides: >-
+      #       SourceBucketName=${{ github.event.inputs.SourceBucketName }},
+      #       TargetPath=s3://${{ github.event.inputs.SourceBucketName }}/input/,
+      #       CrawlerName=source-csv-crawler,
+      #       Database=sales_db
 
-      - name: Deploy Glue Crawler
+      - name: Deploy Glue Crawler for snowflake ingestion
         id: glue-crawler-snowflake
         if: ${{ github.event.inputs.deployCrawler == 'true' }}
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
@@ -157,7 +161,8 @@ jobs:
             CrawlerName=snowflake_input_crawler,
             Database=imba
 
-      - name: Deploy dbt role for glue
+      - name: Deploy Glue role to run dbt
+        if: ${{ github.event.inputs.deployGlueRole == 'true' }}
         id: dbt-glue-role
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
         with:
@@ -165,5 +170,20 @@ jobs:
           template: cfn/dbt-role.yml
           capabilities: CAPABILITY_NAMED_IAM
           parameter-overrides: >-
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }},
+            DataBucketName=${{ github.event.inputs.DataBucketName }}
+
+      - name: Deploy github action role
+        if: ${{ github.event.inputs.deployAssumeRole == 'true' }}
+        id: github-action-role
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: github-action-role
+          template: cfn/github-role.yml
+          capabilities: CAPABILITY_NAMED_IAM
+          # parameter-overrides: "${{ env.PARAMS }}"
+          parameter-overrides: >-
+            AccountId=${{ secrets.AWS_ACCOUNT_ID }},
+            GitHubRepo=${{ github.repository }},
             SourceBucketName=${{ github.event.inputs.SourceBucketName }},
             DataBucketName=${{ github.event.inputs.DataBucketName }}
