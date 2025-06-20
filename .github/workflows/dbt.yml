@@ -38,6 +38,10 @@ jobs:
       # - name: Get AWS account ID
       #   id: get-account
       #   run: echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> "$GITHUB_ENV"
+      - name: Debug expanded values
+        run: |
+          echo "AccountId=${{ secrets.AWS_ACCOUNT_ID }}"
+          echo "GitHubRepo=${{ github.repository }}"
 
       - name: Deploy github action role
         id: github-action-role
@@ -45,9 +49,7 @@ jobs:
         with:
           name: github-action-role
           template: cfn/github-role.yml
-          parameter-overrides: |
-            AccountId=${{ secrets.AWS_ACCOUNT_ID }}
-            GitHubRepo=${{ github.repository }}
+          parameter-overrides: "AccountId=${{ secrets.AWS_ACCOUNT_ID }}, GitHubRepo=${{ github.repository }}"
           capabilities: CAPABILITY_NAMED_IAM
 
   deploy-dbt-glue:
