@@ -3,10 +3,10 @@ name: Deploy dbt-glue
 on:
   workflow_dispatch:
     inputs:
-      region:
-        description: "AWS Region"
-        required: true
-        default: "ap-southeast-2"
+      # region:
+      #   description: "AWS Region"
+      #   required: true
+      #   default: "ap-southeast-2"
       SourceBucketName:
         description: "S3 Source Bucket Name"
         default: "source-bucket-chien"

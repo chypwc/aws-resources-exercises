@@ -6,6 +6,9 @@ Parameters:
   GitHubRepo:
     Description: GitHub repo in the format org/repo
     Type: String
+  # Region:
+  #   Description: Region
+  #   Type: String
   SourceBucketName:
     Description: Name the source Bucket
     Type: String
@@ -39,7 +42,7 @@ Resources:
                   - glue:GetSession
                   - glue:DeleteSession
                   - glue:BatchGetSession
-                Resource: arn:aws:glue:${AWS::Region}:${AWS::AccountId}:session/*
+                Resource: !Sub arn:aws:glue:${AWS::Region}:${AccountId}:session/*
               - Effect: Allow
                 Action:
                   - glue:SearchTables

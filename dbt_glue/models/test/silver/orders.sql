@@ -1,7 +1,7 @@
 {{ config(
     materialized='table',
     schema='sales_silver', 
-    custom_location='s3://source-bucket-chien/output/silver/orders') }}
+    custom_location='s3://data-bucket-chien/output/silver/orders') }}
 
 {#
 {{ config(

@@ -1,7 +1,7 @@
 {{ config(
     materialized='table',
     schema='imba_silver', 
-    custom_location='s3://source-bucket-chien/imba-output/silver/up_feature') }}
+    custom_location='s3://data-bucket-chien/imba-output/silver/up_feature') }}
 
 SELECT
     user_id,

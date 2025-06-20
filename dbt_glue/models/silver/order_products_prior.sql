@@ -1,7 +1,7 @@
 {{ config(
     materialized='table',
     schema='imba_silver', 
-    custom_location='s3://source-bucket-chien/imba-output/silver/order_products_prior') }}
+    custom_location='s3://data-bucket-chien/imba-output/silver/order_products_prior') }}
 
 select o.*,
             op.product_id,

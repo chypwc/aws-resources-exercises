@@ -1,7 +1,7 @@
 {{ config(
     mmaterialized='table',
     schema='sales_gold', 
-    custom_location='s3://source-bucket-chien/output/silver/vw_sales') }}
+    custom_location='s3://data-bucket-chien/output/silver/vw_sales') }}
 
 with prep as (
     select o.order_date, c.customer, o.total_price,

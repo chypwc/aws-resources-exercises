@@ -1,7 +1,7 @@
 {{ config(
     materialized='table',
     schema='imba_silver', 
-    custom_location='s3://source-bucket-chien/imba-output/silver/prd_features') }}
+    custom_location='s3://data-bucket-chien/imba-output/silver/prd_features') }}
 
 WITH product_seqquence AS (
     SELECT
