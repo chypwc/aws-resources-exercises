@@ -1,3 +1,5 @@
+name: Deploy dbt-glue
+
 on:
   workflow_dispatch:
     inputs:
@@ -44,9 +46,7 @@ jobs:
           name: github-action-role
           template: cfn/github-role.yml
           capabilities: CAPABILITY_NAMED_IAM
-          parameter-overrides: >-
-            AccountId=${{ secrets.AWS_ACCOUNT_ID }},
-            GitHubRepo=${{ github.repository }}
+          parameter-overrides: "AccountId=${{ secrets.AWS_ACCOUNT_ID }}, GitHubRepo=${{ github.repository }}"
 
   deploy-dbt-glue:
     runs-on: ubuntu-latest
