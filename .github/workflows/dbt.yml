@@ -19,6 +19,9 @@ on:
         default: "false"
         required: true
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read # Allows checkout of source code
 jobs:
   AssumeRole:
     if: ${{ github.event.inputs.deployAssumeRole == 'true' }}
