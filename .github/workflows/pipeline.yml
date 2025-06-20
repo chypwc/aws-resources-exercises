@@ -14,9 +14,15 @@ on:
       DataBucketName:
         description: "S3 Data Bucket Name"
         default: "data-bucket-chien"
-      csvCrawler:
-        description: "Run csv crawler Job?"
-        required: true
+      # csvCrawler:
+      #   description: "Run csv crawler Job?"
+      #   required: true
+      #   default: "false"
+      runIngestion:
+        description: "Run Glue job of ingestion from snowflake?"
+        default: "false"
+      runCrawler:
+        description: "Run Crawler from snowflake ingestion?"
         default: "false"
 
 permissions:
@@ -44,20 +50,22 @@ jobs:
       #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       #     aws-region: ${{ github.event.inputs.region }}
 
-      - name: Run crawler script - input csv
-        if: ${{ github.event.inputs.csvCrawler == 'true' }}
-        run: |
-          bash pipeline/run_crawler.sh
-        env:
-          CrawlerName: source-csv-crawler
+      # - name: Run crawler script - input csv
+      #   if: ${{ github.event.inputs.csvCrawler == 'true' }}
+      #   run: |
+      #     bash pipeline/run_crawler.sh
+      #   env:
+      #     CrawlerName: source-csv-crawler
 
       # - name: Run Glue job and wait
       #   run: ./scripts/glue_runner.sh sales-aggregation-job
 
-      - name: Run Glue job and wait - snowflake exports
+      - name: Run Glue job and wait - snowflake ingestion
+        if: ${{ github.event.inputs.runIngestion == 'true' }}
         run: ./pipeline/glue_runner.sh snowflake-ingest
 
-      - name: Run crawler script - snowflake exports
+      - name: Run crawler script - snowflake ingestion
+        if: ${{ github.event.inputs.runCrawler == 'true' }}
         run: |
           bash pipeline/run_crawler.sh
         env:
