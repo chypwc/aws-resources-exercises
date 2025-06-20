@@ -117,6 +117,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - glue:StartJobRun
+                  - glue:GetJobRun
                   - glue:GetJobRuns
                   - glue:GetJob
                 Resource: !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/*
