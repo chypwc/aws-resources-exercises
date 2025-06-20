@@ -35,6 +35,13 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - glue:CreateSession
+                  - glue:GetSession
+                  - glue:DeleteSession
+                  - glue:BatchGetSession
+                Resource: arn:aws:glue:${AWS::Region}:${AWS::AccountId}:session/*
+              - Effect: Allow
+                Action:
                   - glue:SearchTables
                   - glue:BatchCreatePartition
                   - glue:CreatePartitionIndex
