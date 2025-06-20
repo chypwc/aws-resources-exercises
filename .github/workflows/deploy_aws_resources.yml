@@ -41,6 +41,10 @@ on:
         description: "Deploy Glue Job?"
         required: true
         default: "false"
+      deployDbtGlueRole:
+        description: "Deploy Glue Role for dbt-glue?"
+        required: true
+        default: "false"
       deployAssumeRole:
         description: "Deploy Github action role?"
         default: "false"
@@ -162,7 +166,7 @@ jobs:
             Database=imba
 
       - name: Deploy Glue role to run dbt
-        if: ${{ github.event.inputs.deployGlueRole == 'true' }}
+        if: ${{ github.event.inputs.deployDbtGlueRole == 'true' }}
         id: dbt-glue-role
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
         with:
