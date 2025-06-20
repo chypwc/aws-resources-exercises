@@ -34,11 +34,49 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action:
-                  - glue:StartJobRun
-                  - glue:StartSession
-                  - glue:GetJobRun
-                Resource: "*"
+                  Action:
+                  - glue:SearchTables
+                  - glue:BatchCreatePartition
+                  - glue:CreatePartitionIndex
+                  - glue:DeleteDatabase
+                  - glue:GetTableVersions
+                  - glue:GetPartitions
+                  - glue:DeleteTableVersion
+                  - glue:UpdateTable
+                  - glue:DeleteTable
+                  - glue:DeletePartitionIndex
+                  - glue:GetTableVersion
+                  - glue:UpdateColumnStatisticsForTable
+                  - glue:CreatePartition
+                  - glue:UpdateDatabase
+                  - glue:CreateTable
+                  - glue:GetTables
+                  - glue:GetDatabases
+                  - glue:GetTable
+                  - glue:GetDatabase
+                  - glue:GetPartition
+                  - glue:UpdateColumnStatisticsForPartition
+                  - glue:CreateDatabase
+                  - glue:BatchDeleteTableVersion
+                  - glue:BatchDeleteTable
+                  - glue:DeletePartition
+                  - glue:GetUserDefinedFunctions
+                  - lakeformation:ListResources
+                  - lakeformation:BatchGrantPermissions
+                  - lakeformation:ListPermissions
+                  - lakeformation:GetDataAccess
+                  - lakeformation:GrantPermissions
+                  - lakeformation:RevokePermissions
+                  - lakeformation:BatchRevokePermissions
+                  - lakeformation:AddLFTagsToResource
+                  - lakeformation:RemoveLFTagsFromResource
+                  - lakeformation:GetResourceLFTags
+                  - lakeformation:ListLFTags
+                  - lakeformation:GetLFTag
+                Resource:
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/*
+                  - !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/*
               - Effect: Allow
                 Action:
                   - iam:PassRole

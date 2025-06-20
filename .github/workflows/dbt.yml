@@ -61,6 +61,7 @@ jobs:
             DataBucketName=${{ github.event.inputs.DataBucketName }}
 
   deploy-dbt-glue:
+    needs: AssumeRole
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
