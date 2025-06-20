@@ -49,7 +49,7 @@ jobs:
           name: github-action-role
           template: cfn/github-role.yml
           capabilities: CAPABILITY_NAMED_IAM
-          parameter-overrides: ${{ env.PARAMS }}
+          parameter-overrides: "${{ env.PARAMS }}"
           # parameter-overrides: >-
           #   AccountId=${{ secrets.AWS_ACCOUNT_ID }}
           #   GitHubRepo=${{ github.repository }}
