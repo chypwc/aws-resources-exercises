@@ -45,10 +45,10 @@ jobs:
         with:
           name: github-action-role
           template: cfn/github-role.yml
-          capabilities: CAPABILITY_NAMED_IAM
           parameter-overrides: >-
-            AccountId=${{ secrets.AWS_ACCOUNT_ID }}
+            AccountId=${{ secrets.AWS_ACCOUNT_ID }},
             GitHubRepo=${{ github.repository }}
+          capabilities: CAPABILITY_NAMED_IAM
 
   deploy-dbt-glue:
     runs-on: ubuntu-latest
