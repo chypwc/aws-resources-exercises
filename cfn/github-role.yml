@@ -114,3 +114,15 @@ Resources:
                 Resource:
                   - !Sub arn:aws:s3:::${SourceBucketName}/*
                   - !Sub arn:aws:s3:::${DataBucketName}/*
+              - Effect: Allow
+                Action:
+                  - glue:StartJobRun
+                Resource: !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/*
+              - Effect: Allow
+                Action:
+                  - glue:StartCrawler
+                  - glue:GetCrawler
+                  - glue:GetCrawlerMetrics
+                  - glue:StopCrawler
+                  - glue:UpdateCrawler
+                Resource: !Sub arn:aws:glue:${AWS::Region}:${AWS::AccountId}:crawler/*
