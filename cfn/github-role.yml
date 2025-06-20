@@ -42,6 +42,7 @@ Resources:
                   - glue:GetSession
                   - glue:DeleteSession
                   - glue:BatchGetSession
+                  - glue:RunStatement
                 Resource: !Sub arn:aws:glue:${AWS::Region}:${AccountId}:session/*
               - Effect: Allow
                 Action:
