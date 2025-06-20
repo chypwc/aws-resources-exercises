@@ -12,14 +12,18 @@ on:
       DataBucketName:
         description: "S3 Data Bucket Name"
         default: "data-bucket-chien"
+      deployAssumeRole:
+        description: "Deploy Github action role?"
+        default: "false"
+        required: true
 
 jobs:
-  deploy-dbt-glue:
+  AssumeRole:
+    if: ${{ github.event.inputs.deployAssumeRole == 'true' }}
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         id: creds-pipeline
@@ -29,9 +33,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ github.event.inputs.region }}
 
-      - name: Get AWS account ID
-        id: get-account
-        run: echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> "$GITHUB_ENV"
+      # - name: Get AWS account ID
+      #   id: get-account
+      #   run: echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> "$GITHUB_ENV"
 
       - name: Deploy github action role
         id: github-action-role
@@ -41,13 +45,19 @@ jobs:
           template: cfn/github-role.yml
           capabilities: CAPABILITY_NAMED_IAM
           parameter-overrides: >-
-            AccountId=${{ env.ACCOUNT_ID }},
+            AccountId=${{ secrets.AWS_ACCOUNT_ID }},
             GitHubRepo=${{ github.repository }}
 
+  deploy-dbt-glue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume=arn:aws:iam::${{ env.ACCOUNT_ID }}:role/GitHubActionsRole
+          role-to-assume=arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
           aws-region=${{ github.event.inputs.region }}
 
       - name: Install AWS CLI and dbt-glue
@@ -57,11 +67,11 @@ jobs:
       - name: Create dbt profiles.yml
         run: ./pipeline/create_profiles.sh
         env:
-          ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
+          ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           REGION: ${{ github.event.inputs.region }}
           TARGET_BUCKET: ${{ github.event.inputs.DataBucketName }}
 
       - name: Run dbt on Glue Interactive Sessions
         run: |
-          aaws s3 rm s3://${{ github.event.inputs.DataBucketName }}/imba-output/ --recursive    
+          aws s3 rm s3://${{ github.event.inputs.DataBucketName }}/imba-output/ --recursive    
           dbt run --profiles-dir ~/.dbt/ --project-dir dbt_glue/
