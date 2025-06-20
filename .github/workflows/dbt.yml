@@ -51,7 +51,7 @@ jobs:
           capabilities: CAPABILITY_NAMED_IAM
           # parameter-overrides: ${{ env.PARAMS }}
           parameter-overrides: >-
-            AccountId=123456789012 GitHubRepo=my-org/my-repo SourceBucketName=source-bucket-chien DataBucketName=data-bucket-chien
+            AccountId=123456789012 GitHubRepo=chypwc/aws-resources-exercises SourceBucketName=source-bucket-chien DataBucketName=data-bucket-chien
           # parameter-overrides: >-
           #   AccountId=${{ secrets.AWS_ACCOUNT_ID }}
           #   GitHubRepo=${{ github.repository }}
