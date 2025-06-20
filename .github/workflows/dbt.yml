@@ -77,7 +77,7 @@ jobs:
           pip install awscli dbt-core dbt-glue
 
       - name: Create dbt profiles.yml
-        run: ./pipeline/create_profiles.sh
+        run: pipeline/create_profiles.sh
         env:
           ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           REGION: ${{ github.event.inputs.region }}
