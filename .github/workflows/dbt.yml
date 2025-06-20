@@ -45,7 +45,7 @@ jobs:
 
       - name: Deploy github action role
         id: github-action-role
-        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: github-action-role
           template: cfn/github-role.yml
