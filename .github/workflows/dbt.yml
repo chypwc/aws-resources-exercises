@@ -38,9 +38,10 @@ jobs:
       # - name: Get AWS account ID
       #   id: get-account
       #   run: echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> "$GITHUB_ENV"
-      - name: Compose parameter string
-        run: |
-          echo "PARAMS=AccountId=${{ secrets.AWS_ACCOUNT_ID }} GitHubRepo=${{ github.repository }} SourceBucketName=${{ github.event.inputs.SourceBucketName }} DataBucketName=${{ github.event.inputs.DataBucketName }}" >> $GITHUB_ENV
+
+      # - name: Compose parameter string
+      #   run: |
+      #     echo "PARAMS=AccountId=${{ secrets.AWS_ACCOUNT_ID }} GitHubRepo=${{ github.repository }} SourceBucketName=${{ github.event.inputs.SourceBucketName }} DataBucketName=${{ github.event.inputs.DataBucketName }}" >> $GITHUB_ENV
 
       - name: Deploy github action role
         id: github-action-role
@@ -49,12 +50,12 @@ jobs:
           name: github-action-role
           template: cfn/github-role.yml
           capabilities: CAPABILITY_NAMED_IAM
-          parameter-overrides: "${{ env.PARAMS }}"
-          # parameter-overrides: >-
-          #   AccountId=${{ secrets.AWS_ACCOUNT_ID }}
-          #   GitHubRepo=${{ github.repository }}
-          #   SourceBucketName=${{ github.event.inputs.SourceBucketName }}
-          #   DataBucketName=${{ github.event.inputs.DataBucketName }}
+          # parameter-overrides: "${{ env.PARAMS }}"
+          parameter-overrides: >-
+            AccountId=${{ secrets.AWS_ACCOUNT_ID }}
+            GitHubRepo=${{ github.repository }}
+            SourceBucketName=${{ github.event.inputs.SourceBucketName }}
+            DataBucketName=${{ github.event.inputs.DataBucketName }}
 
   deploy-dbt-glue:
     runs-on: ubuntu-latest
